@@ -23,4 +23,4 @@ dist-ssr
 *.sw?
 
 .openclaw/*
-!.openclaw/openclaw.json
+!.openclaw/openclaw.example.json
