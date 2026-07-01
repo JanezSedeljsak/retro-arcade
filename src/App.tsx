@@ -1,10 +1,5 @@
 function App() {
-  const x = test();
-  return <>{x}</>;
-}
-
-function test() {
-  return 5;
+  return <h1>Retro Arcade</h1>;
 }
 
 export default App;
