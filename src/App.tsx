@@ -1,6 +1,6 @@
 function App() {
   const x = test();
-  return <>test</>;
+  return <>{x}</>;
 }
 
 function test() {
