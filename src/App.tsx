@@ -1,7 +1,10 @@
-import { useState } from "react";
-
 function App() {
-  return <>hello</>;
+  const x = test();
+  return <>test</>;
+}
+
+function test() {
+  return 5;
 }
 
 export default App;
