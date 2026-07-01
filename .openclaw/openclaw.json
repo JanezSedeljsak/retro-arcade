@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openrouter/openai/gpt-oss-120b:free"
+      },
+      "models": {
+        "openrouter/openai/gpt-oss-120b:free": {}
+      }
+    }
+  }
+}
