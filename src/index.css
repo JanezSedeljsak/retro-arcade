@@ -1,0 +1,223 @@
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  background: #080812;
+  font-family: system-ui, sans-serif;
+}
+
+/* ---------- Layout ---------- */
+
+.retro-layout {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr;
+  background: radial-gradient(
+    circle at center,
+    #27214b 0%,
+    #13132a 60%,
+    #080812 100%
+  );
+}
+
+/* Mobile gets extra button area */
+
+@media (max-width: 768px) {
+  .retro-layout {
+    grid-template-rows: 1fr 22vh;
+  }
+}
+
+/* ---------- Outer Bezel ---------- */
+
+.retro-bezel {
+  position: relative;
+  overflow: hidden;
+  padding: 2.25vmin;
+  background: linear-gradient(135deg, #1d1d40 0%, #101028 45%, #292955 100%);
+}
+
+.retro-bezel::before,
+.retro-bezel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* vignette */
+
+.retro-bezel::before {
+  inset: 0;
+  box-shadow:
+    inset 0 0 120px rgba(0, 0, 0, 0.7),
+    inset 0 0 40px rgba(255, 255, 255, 0.03);
+}
+
+/* angled corners */
+
+.retro-bezel::after {
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 12%) top left,
+    linear-gradient(-135deg, rgba(255, 255, 255, 0.08), transparent 12%) top
+      right,
+    linear-gradient(45deg, rgba(255, 255, 255, 0.08), transparent 12%) bottom
+      left,
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.08), transparent 12%) bottom
+      right;
+  background-size: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+/* ---------- CRT Screen ---------- */
+
+.retro-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  border-radius: 5vmin;
+
+  background: radial-gradient(
+    circle at center,
+    #45366a 0%,
+    #332651 55%,
+    #231938 100%
+  );
+}
+
+/* subtle screen curvature */
+
+.retro-screen::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 55%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+  pointer-events: none;
+}
+
+/* glossy reflection */
+
+.retro-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    80deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.06) 68%,
+    transparent 100%
+  );
+}
+
+/* grid + scanlines */
+
+.retro-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 120, 220, 0.22) 0,
+      rgba(255, 120, 220, 0.22) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 120, 220, 0.22) 0,
+      rgba(255, 120, 220, 0.22) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.32) 0,
+      rgba(0, 0, 0, 0.32) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+}
+
+/* game/app content */
+
+.retro-content {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: auto;
+}
+
+/* ---------- Mobile Controls ---------- */
+
+.mobile-controls {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .retro-layout {
+    /* Screen takes remaining space, controls only as much as needed */
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .mobile-controls {
+    display: grid;
+
+    /* Up to 2 rows */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(48px, auto);
+
+    gap: 12px;
+    padding: 12px 16px;
+
+    background: linear-gradient(#1a1a36, #101021);
+    border-top: 2px solid rgba(255, 255, 255, 0.06);
+
+    /* Don't grow forever */
+    max-height: calc(2 * 48px + 3 * 12px + 24px);
+    overflow-y: auto;
+  }
+
+  /* Hide completely if nothing is rendered */
+  .mobile-controls:empty {
+    display: none;
+  }
+
+  /* If empty, let the screen occupy the whole viewport */
+  .retro-layout:has(.mobile-controls:empty) {
+    grid-template-rows: 1fr;
+  }
+
+  .mobile-controls > * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+  }
+}
