@@ -1,5 +1,5 @@
 import kaplay from "kaplay";
-import ballSprite from "@/assets/character.png";
+import ballSprite from "@/assets/character.webp";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -15,7 +15,8 @@ export function start(
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     global: false,
-    background: [0, 0, 0, 0],
+    // Dark purple in the same family as the app theme (#1d1d40 / #14142c).
+    background: [42, 42, 74],
   });
 
   k.loadSprite("ball", ballSprite);
@@ -34,11 +35,21 @@ export function start(
   const paddleHeight = k.height() * 0.2;
   const paddleMargin = k.width() * 0.03;
   const paddleSpeed = k.height() * 0.9;
-  const botSpeed = paddleSpeed * 0.78;
+  const botSpeed = paddleSpeed * 0.7;
 
   const ballRadius = k.width() * 0.045;
   const ballBaseSpeed = k.width() * 0.75;
   const ballSpeedIncrease = 1.05;
+
+  const goalWidth = k.width() * 0.01;
+
+  k.add([k.rect(goalWidth, k.height()), k.pos(0, 0), k.color(255, 120, 220)]);
+
+  k.add([
+    k.rect(goalWidth, k.height()),
+    k.pos(k.width() - goalWidth, 0),
+    k.color(255, 120, 220),
+  ]);
 
   const player = k.add([
     k.rect(paddleWidth, paddleHeight),
@@ -61,19 +72,21 @@ export function start(
     k.pos(k.width() / 2, k.height() / 2),
     k.anchor("center"),
     k.area(),
-    k.scale((ballRadius * 2) / 800),
+    // 225 keeps the same rendered size as the old 640px sprite at /800.
+    k.scale((ballRadius * 2) / 225),
     k.rotate(0),
     {
       vel: k.vec2(0, 0),
     },
   ]);
 
-  const startTime = Date.now();
+  let startTime = Date.now();
   let playerScore = 0;
+  let botScore = 0;
   let gameOver = false;
 
   const scoreText = k.add([
-    k.text(`${playerScore}`, { size: k.height() * 0.06 }),
+    k.text(`${playerScore} : ${botScore}`, { size: k.height() * 0.06 }),
     k.pos(k.width() / 2, k.height() * 0.05),
     k.anchor("top"),
     k.color(241, 234, 255),
@@ -102,7 +115,20 @@ export function start(
       .scale(ballBaseSpeed);
   }
 
+  function restart() {
+    playerScore = 0;
+    botScore = 0;
+    gameOver = false;
+    startTime = Date.now();
+    scoreText.text = `${playerScore} : ${botScore}`;
+    player.pos.y = k.height() / 2;
+    bot.pos.y = k.height() / 2;
+    serveBall(k.choose([-1, 1]));
+  }
+
   serveBall(k.choose([-1, 1]));
+
+  k.onKeyPress("r", restart);
 
   k.onKeyDown("w", () => {
     player.pos.y = Math.max(
@@ -168,11 +194,17 @@ export function start(
     bounceOffPaddle(player, -1);
     bounceOffPaddle(bot, 1);
 
-    if (ball.pos.x < -ballRadius * 2) {
+    // A goal counts as soon as the ball touches the left or right side.
+    if (ball.pos.x - ballRadius <= goalWidth && ball.vel.x < 0) {
+      botScore++;
+      scoreText.text = `${playerScore} : ${botScore}`;
       serveBall(1);
-    } else if (ball.pos.x > k.width() + ballRadius * 2) {
+    } else if (
+      ball.pos.x + ballRadius >= k.width() - goalWidth &&
+      ball.vel.x > 0
+    ) {
       playerScore++;
-      scoreText.text = `${playerScore}`;
+      scoreText.text = `${playerScore} : ${botScore}`;
       if (playerScore >= WINNING_SCORE) {
         endGame();
       } else {

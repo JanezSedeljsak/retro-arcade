@@ -1,86 +1,103 @@
 # AGENTS.md
 
-Guidelines for AI agents (and humans) contributing code to this repository.
+Guidelines for AI agents (and humans) contributing to this repository.
 
 ## What this app is
 
-Retro Arcade is a web + mobile (PWA) platform for playing small retro-style
-mini games (Pong, Space Invaders, Whirlybird, Stack Tower, ...) directly in
-the browser, and tracking leaderboards per game. Games run on an HTML5
-`<canvas>` via the `kaplay` game engine; React + React Router provide the
-shell (home grid, game page, layout, navigation) around the canvas. The app
-installs as a PWA so it works well on mobile home screens.
+Retro Arcade: a web + mobile (PWA) platform for playing retro mini games
+(Pong, Space Invaders, Whirlybird, Stack Tower) in the browser, with a
+Supabase-backed leaderboard per game. Games run on an HTML5 `<canvas>` via
+the `kaplay` engine; React + React Router provide the shell around it.
+
+## Commands
+
+- `npm run dev` — dev server (`vite --host`)
+- `npm test` — Vitest (`test:watch` for watch mode)
+- `npm run typecheck` / `npm run lint` — run both before finishing a change
 
 ## Project structure
 
 ```
 src/
-  main.tsx           # app entry point
-  App.tsx            # router setup (routes: "/" home, "/games/:gameId" game page)
-  index.css          # global styles
+  main.tsx                  # app entry point
+  App.tsx                   # routes: "/" Home, "/games/:gameId" GamePage
+  index.css                 # global styles
+  assets/                   # bundled images, imported via @/assets/...
+  lib/
+    supabase.ts             # getSupabase() — lazy singleton Supabase client
+  hooks/
+    useLeaderboard.ts       # scores fetch/submit for a gameId + stored username
   components/
-    Layout.tsx        # page shell/nav wrapper
-    GameCanvas.tsx     # generic canvas host, wires a game's start() fn to a <canvas>
+    Layout.tsx              # page shell/nav wrapper
+    GameCanvas.tsx          # canvas host, wires a game's start() to <canvas>
+    LeaderboardModal.tsx    # score list + submit form (lazy-loaded)
   pages/
-    Home.tsx           # game grid + leaderboard entry points
-    Game.tsx           # resolves :gameId, mounts the matching game via GameCanvas
+    Home.tsx                # game grid + leaderboard entry points
+    Game.tsx                # resolves :gameId, lazy-loads game via import.meta.glob
   games/
-    registry.ts        # GameMeta list (id, title, description) — single source of truth for games shown on Home
-    <game-id>/
-      index.ts          # exports start(canvas): cleanup — the kaplay game implementation
+    registry.ts             # GameMeta list — single source of truth for Home
+    <game-id>/index.ts      # the kaplay game, exports start()
 public/
-  fonts/, images/       # static assets referenced with import.meta.env.BASE_URL
+  fonts/, images/           # static assets, referenced with import.meta.env.BASE_URL
 ```
 
-Each game lives in its own folder under `src/games/<game-id>/` and exposes a
-`start(canvas: HTMLCanvasElement): () => void` function (setup + returned
-cleanup/teardown). `GameCanvas` calls `start` in a `useEffect` and invokes the
-returned cleanup on unmount. To add a new game: create `src/games/<id>/index.ts`
-with a `start` function, and add an entry to `src/games/registry.ts`.
+## Games
 
-## Searching the codebase
+Each game exports:
 
-`node_modules` is gitignored and not part of this project's source — never
-search, grep, or glob through it. Scope searches to `src/`, `public/`, and
-root config files, or explicitly exclude `node_modules` (e.g.
-`grep -r --exclude-dir=node_modules`, `rg` already respects `.gitignore` by
-default).
+```ts
+start(canvas: HTMLCanvasElement, onGameOver?: (score: number) => void): () => void
+```
+
+`start` sets up the game and returns a cleanup/teardown function.
+`GameCanvas` calls it in an effect and runs the cleanup on unmount. Call
+`onGameOver(finalScore)` when the run ends — `GamePage` uses it to open the
+leaderboard modal with a submit form. See `src/games/pong/index.ts` for the
+reference implementation (canvas sizing quirks, sprites, mobile controls).
+
+To add a game: create `src/games/<id>/index.ts` exporting `start`, add an
+entry to `src/games/registry.ts`. `Game.tsx` picks it up automatically via
+`import.meta.glob`.
+
+## Leaderboard / Supabase
+
+- Client: `getSupabase()` from `@/lib/supabase` — never create another client.
+  Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env`
+  (gitignored, not in the repo).
+- Data: one `scores` table — `id, game_id, username, score, created_at`.
+  `useLeaderboard(gameId)` fetches top 30 by score and handles submits;
+  the username persists in localStorage (`retro-arcade:username`).
+- UI: `LeaderboardModal` — opened from Home (view only) and from GamePage
+  after game over (with score submit). Always lazy-load it
+  (`lazy(() => import(...))`) so Supabase stays out of the initial bundle.
 
 ## Rules for AI-written code
 
-- **No new dependencies.** Do not add, suggest, or install new npm packages.
-  Build features with what's already in `package.json` (React, react-router-dom,
-  kaplay) and the browser/DOM APIs. If a task truly seems to need a new
-  library, stop and ask the user first instead of installing one.
-- **No `useMemo` / `useCallback`.** Do not introduce memoization hooks. Write
-  plain components; only `useState`, `useEffect`, and `useRef` are expected in
-  this codebase (see `GameCanvas.tsx` for the established pattern). If
-  something feels slow, that's a signal to raise it with the user rather than
-  reach for memoization.
-- **Keep it simple.** Match the existing minimal style: small functional
-  components, no unnecessary abstractions, no speculative configuration
-  options, no half-finished features.
-- **Prefer `const styles = {...}` over a `.css` file for simple styling.** If a
-  component's styles have no hover/focus states, animations, or media
-  queries, and would total under ~30 lines of CSS, define them inline as a
-  `const styles: { ... } = { ... }` object of `CSSProperties` in the component
-  file and use `style={styles.x}` instead of creating a colocated `.css` file
-  (see `GameCanvas.tsx`). Once a component's styles need any of those
-  features, use a colocated `.css` file instead (see `Layout.css`,
-  `Home.css`, `Game.css`).
-- **TypeScript everywhere**, no `any` unless truly unavoidable. Reuse existing
-  types (e.g. `GameMeta`) instead of redefining shapes.
-- **Always use the `@/` path alias, never relative `./` or `../` imports** —
-  for anything other than a component's own colocated `.css` file. The alias
-  maps to `src/` (see `tsconfig.app.json` / `vite.config.ts`). Two exceptions:
-  - **Colocated CSS imports stay relative** (`import "./Layout.css"`, not
-    `import "@/components/Layout.css"`) since the file always lives right
-    next to the component that imports it.
-  - **Dynamic `import.meta.glob(...)` patterns** (e.g. in `registry.test.ts`,
-    `Game.tsx`) also stay relative.
-- **Follow existing conventions**: Prettier formatting (runs via
-  lint-staged/husky pre-commit — don't fight it), and the existing file/folder
-  naming patterns above.
-- **Tests**: colocate as `*.test.ts(x)` next to the file under test (see
-  `registry.test.ts`, `App.test.tsx`), run with `npm test` (Vitest).
-- Before finishing a change, run `npm run typecheck` and `npm run lint`.
+- **No new dependencies.** Build with what's in `package.json` (React,
+  react-router-dom, kaplay, @supabase/supabase-js) and browser/DOM APIs. If a
+  task truly needs a new library, stop and ask the user first.
+- **No `useMemo` / `useCallback`.** Stick to `useState`, `useEffect`,
+  `useRef` (see `GameCanvas.tsx`). Sole existing exception: the lazy game
+  loading in `Game.tsx` — don't spread that pattern. If something feels
+  slow, raise it with the user instead of memoizing.
+- **Keep it simple.** Small functional components, no speculative
+  abstractions or configuration, no half-finished features.
+- **Styling:** inline `const styles: { ... } = { ... }` of `CSSProperties`
+  for simple cases — no hover/focus, animations, or media queries, under
+  ~30 lines (see `GameCanvas.tsx`). Otherwise a colocated `.css` file (see
+  `Layout.css`, `LeaderboardModal.css`).
+- **TypeScript everywhere**, no `any` unless truly unavoidable. Reuse
+  existing types (`GameMeta`, the `Score` shape in `useLeaderboard.ts`)
+  instead of redefining them.
+- **Imports: always the `@/` alias** (maps to `src/`), never `./` or `../`.
+  Two exceptions that stay relative: colocated CSS (`import "./Layout.css"`)
+  and `import.meta.glob(...)` patterns (`Game.tsx`, `registry.test.ts`).
+- **Tests:** colocate as `*.test.ts(x)` next to the file under test.
+- **Formatting:** Prettier runs via lint-staged/husky pre-commit — don't
+  fight it.
+
+## Searching the codebase
+
+`node_modules` is gitignored — never search or glob through it. Scope
+searches to `src/`, `public/`, and root config files (`rg` respects
+`.gitignore` by default).

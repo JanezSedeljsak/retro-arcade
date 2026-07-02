@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import { games } from "@/games/registry";
-import character from "@/assets/character.png";
+import character from "@/assets/character.webp";
 import "./Home.css";
 
 const LeaderboardModal = lazy(() =>
@@ -31,13 +31,13 @@ export function Home() {
                 className="game-card-image"
               />
               <div className="game-card-info">
-                <h3 className="game-card-title">{game.title}</h3>
+                <h2 className="game-card-title">{game.title}</h2>
                 <p className="game-card-description">{game.description}</p>
               </div>
             </Link>
             <button
               type="button"
-              className="game-card-leaderboard-btn"
+              className="default-btn game-card-leaderboard-btn"
               onClick={() => setOpenGameId(game.id)}
             >
               Leaderboard

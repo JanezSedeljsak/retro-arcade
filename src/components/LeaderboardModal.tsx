@@ -2,6 +2,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import { getStoredUsername, useLeaderboard } from "@/hooks/useLeaderboard";
 import "./LeaderboardModal.css";
 
+function formatTimestamp(isoDate: string) {
+  const d = new Date(isoDate);
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${d.toLocaleDateString("sl")} ${hours}:${minutes}`;
+}
+
 type LeaderboardModalProps = {
   gameId: string;
   title: string;
@@ -62,7 +69,9 @@ export function LeaderboardModal({
               required
               autoFocus
             />
-            <button type="submit">Submit Score</button>
+            <button type="submit" className="default-btn">
+              Submit Score
+            </button>
           </form>
         )}
 
@@ -73,15 +82,28 @@ export function LeaderboardModal({
         ) : scores.length === 0 ? (
           <p className="leaderboard-status">No scores yet.</p>
         ) : (
-          <ol className="leaderboard-list">
-            {scores.map((s, i) => (
-              <li key={s.id}>
-                <span className="leaderboard-rank">{i + 1}</span>
-                <span className="leaderboard-name">{s.username}</span>
-                <span className="leaderboard-points">{Math.abs(s.score)}</span>
-              </li>
-            ))}
-          </ol>
+          <>
+            <div className="leaderboard-list-header">
+              <span className="leaderboard-rank">#</span>
+              <span className="leaderboard-name">Player</span>
+              <span className="leaderboard-date">Date</span>
+              <span className="leaderboard-points">Score</span>
+            </div>
+            <ol className="leaderboard-list">
+              {scores.map((s, i) => (
+                <li key={s.id}>
+                  <span className="leaderboard-rank">{i + 1}</span>
+                  <span className="leaderboard-name">{s.username}</span>
+                  <span className="leaderboard-date">
+                    {formatTimestamp(s.created_at)}
+                  </span>
+                  <span className="leaderboard-points">
+                    {Math.abs(s.score)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </div>
     </div>
