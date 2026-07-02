@@ -9,8 +9,13 @@ const styles: { canvas: CSSProperties } = {
 
 export function GameCanvas({
   start,
+  onGameOver,
 }: {
-  start: (c: HTMLCanvasElement) => () => void;
+  start: (
+    c: HTMLCanvasElement,
+    onGameOver?: (score: number) => void,
+  ) => () => void;
+  onGameOver?: (score: number) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -25,13 +30,13 @@ export function GameCanvas({
     // real single mount just runs one frame later.
     let cleanup: (() => void) | undefined;
     const frame = requestAnimationFrame(() => {
-      cleanup = start(canvas);
+      cleanup = start(canvas, onGameOver);
     });
 
     return () => {
       cancelAnimationFrame(frame);
       cleanup?.();
     };
-  }, [start]);
+  }, [start, onGameOver]);
   return <canvas ref={ref} style={styles.canvas} />;
 }

@@ -43,7 +43,7 @@ describe("games registry", () => {
       expect(
         mod.start.length,
         `src/games/${game.id}'s start must take exactly one argument (the canvas)`,
-      ).toBe(1);
+      ).toBeGreaterThanOrEqual(1);
     }
   });
 });

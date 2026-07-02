@@ -1,11 +1,25 @@
+import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import { games } from "@/games/registry";
+import character from "@/assets/character.png";
 import "./Home.css";
 
+const LeaderboardModal = lazy(() =>
+  import("@/components/LeaderboardModal").then((m) => ({
+    default: m.LeaderboardModal,
+  })),
+);
+
 export function Home() {
+  const [openGameId, setOpenGameId] = useState<string | null>(null);
+  const openGame = games.find((g) => g.id === openGameId);
+
   return (
     <div className="home">
-      <h1>Retro Arcade</h1>
+      <h1>
+        Retr
+        <img src={character} alt="o" className="home-title-o" /> Arcade
+      </h1>
       <p>Welcome to the Retro Arcade!</p>
       <ul className="game-grid">
         {games.map((game) => (
@@ -21,12 +35,25 @@ export function Home() {
                 <p className="game-card-description">{game.description}</p>
               </div>
             </Link>
-            <button type="button" className="game-card-leaderboard-btn">
+            <button
+              type="button"
+              className="game-card-leaderboard-btn"
+              onClick={() => setOpenGameId(game.id)}
+            >
               Leaderboard
             </button>
           </li>
         ))}
       </ul>
+      {openGame && (
+        <Suspense fallback={null}>
+          <LeaderboardModal
+            gameId={openGame.id}
+            title={openGame.title}
+            onClose={() => setOpenGameId(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

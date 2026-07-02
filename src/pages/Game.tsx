@@ -1,19 +1,34 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { lazy, useMemo, Suspense } from "react";
+import { lazy, useMemo, useState, useCallback, Suspense } from "react";
 import { games } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
 import "./Game.css";
 
 const gameModules = import.meta.glob<{
-  start: (c: HTMLCanvasElement) => () => void;
+  start: (
+    c: HTMLCanvasElement,
+    onGameOver?: (score: number) => void,
+  ) => () => void;
 }>("../games/*/index.ts");
+
+const LeaderboardModal = lazy(() =>
+  import("@/components/LeaderboardModal").then((m) => ({
+    default: m.LeaderboardModal,
+  })),
+);
 
 function resolveLoader(gameId: string) {
   const key = `../games/${gameId}/index.ts`;
   return gameModules[key] ?? null;
 }
 
-function LazyGame({ gameId }: { gameId: string }) {
+function LazyGame({
+  gameId,
+  onGameOver,
+}: {
+  gameId: string;
+  onGameOver: (score: number) => void;
+}) {
   const loader = resolveLoader(gameId);
 
   const GameModule = useMemo(() => {
@@ -22,7 +37,7 @@ function LazyGame({ gameId }: { gameId: string }) {
       const mod = await loader();
       return {
         default: function Game() {
-          return <GameCanvas start={mod.start} />;
+          return <GameCanvas start={mod.start} onGameOver={onGameOver} />;
         },
       };
     });
@@ -40,6 +55,11 @@ function LazyGame({ gameId }: { gameId: string }) {
 export function GamePage() {
   const { gameId } = useParams<{ gameId: string }>();
   const meta = games.find((g) => g.id === gameId);
+  const [finalScore, setFinalScore] = useState<number | null>(null);
+
+  const handleGameOver = useCallback((score: number) => {
+    setFinalScore(score);
+  }, []);
 
   if (!gameId) return <Navigate to="/" replace />;
 
@@ -52,8 +72,18 @@ export function GamePage() {
         <h2 className="game-title">{meta?.title ?? gameId}</h2>
       </div>
       <div className="game-viewport">
-        <LazyGame gameId={gameId} />
+        <LazyGame gameId={gameId} onGameOver={handleGameOver} />
       </div>
+      {finalScore !== null && (
+        <Suspense fallback={null}>
+          <LeaderboardModal
+            gameId={gameId}
+            title={meta?.title ?? gameId}
+            score={finalScore}
+            onClose={() => setFinalScore(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
