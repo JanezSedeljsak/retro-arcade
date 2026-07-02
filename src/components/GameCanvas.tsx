@@ -1,4 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+
+const styles: { canvas: CSSProperties } = {
+  canvas: {
+    maxWidth: "100%",
+    maxHeight: "100%",
+  },
+};
 
 export function GameCanvas({
   start,
@@ -10,5 +17,5 @@ export function GameCanvas({
     if (!ref.current) return;
     return start(ref.current);
   }, [start]);
-  return <canvas ref={ref} className="game-canvas" />;
+  return <canvas ref={ref} style={styles.canvas} />;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { games } from "./registry";
+import { games } from "@/games/registry";
 
 const gameModules = import.meta.glob<{
   start: (c: HTMLCanvasElement) => () => void;

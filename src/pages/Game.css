@@ -1,0 +1,45 @@
+/* ---------- Game Page ---------- */
+
+.game-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #f1eaff;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 4vmin;
+  border-bottom: 2px solid rgba(255, 120, 220, 0.2);
+}
+
+.game-back-link {
+  color: #ff78dc;
+  text-decoration: none;
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
+
+.game-back-link:hover {
+  text-decoration: underline;
+}
+
+.game-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #f1eaff;
+}
+
+.game-viewport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.game-loading {
+  color: rgba(241, 234, 255, 0.7);
+}

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { games } from "@/games/registry";
+import "./Home.css";
 
 export function Home() {
   return (

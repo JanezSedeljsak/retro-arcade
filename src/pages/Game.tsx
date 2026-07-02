@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { lazy, useMemo, Suspense } from "react";
 import { games } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
+import "./Game.css";
 
 const gameModules = import.meta.glob<{
   start: (c: HTMLCanvasElement) => () => void;

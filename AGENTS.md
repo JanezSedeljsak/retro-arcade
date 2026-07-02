@@ -52,10 +52,25 @@ with a `start` function, and add an entry to `src/games/registry.ts`.
 - **Keep it simple.** Match the existing minimal style: small functional
   components, no unnecessary abstractions, no speculative configuration
   options, no half-finished features.
+- **Prefer `const styles = {...}` over a `.css` file for simple styling.** If a
+  component's styles have no hover/focus states, animations, or media
+  queries, and would total under ~30 lines of CSS, define them inline as a
+  `const styles: { ... } = { ... }` object of `CSSProperties` in the component
+  file and use `style={styles.x}` instead of creating a colocated `.css` file
+  (see `GameCanvas.tsx`). Once a component's styles need any of those
+  features, use a colocated `.css` file instead (see `Layout.css`,
+  `Home.css`, `Game.css`).
 - **TypeScript everywhere**, no `any` unless truly unavoidable. Reuse existing
   types (e.g. `GameMeta`) instead of redefining shapes.
-- **Follow existing conventions**: `@/` path alias for imports from `src/`
-  (see `tsconfig.app.json` / `vite.config.ts`), Prettier formatting (runs via
+- **Always use the `@/` path alias, never relative `./` or `../` imports** —
+  for anything other than a component's own colocated `.css` file. The alias
+  maps to `src/` (see `tsconfig.app.json` / `vite.config.ts`). Two exceptions:
+  - **Colocated CSS imports stay relative** (`import "./Layout.css"`, not
+    `import "@/components/Layout.css"`) since the file always lives right
+    next to the component that imports it.
+  - **Dynamic `import.meta.glob(...)` patterns** (e.g. in `registry.test.ts`,
+    `Game.tsx`) also stay relative.
+- **Follow existing conventions**: Prettier formatting (runs via
   lint-staged/husky pre-commit — don't fight it), and the existing file/folder
   naming patterns above.
 - **Tests**: colocate as `*.test.ts(x)` next to the file under test (see

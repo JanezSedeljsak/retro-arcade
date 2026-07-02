@@ -1,155 +1,257 @@
+/* ---------- Layout ---------- */
+
 .retro-layout {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #000;
-  overflow: hidden;
-  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr;
+  background: radial-gradient(
+    circle at center,
+    #27214b 0%,
+    #13132a 60%,
+    #080812 100%
+  );
 }
+
+/* Mobile gets extra button area */
+
+@media (max-width: 768px) {
+  .retro-layout {
+    grid-template-rows: 1fr 22vh;
+  }
+}
+
+/* ---------- Outer Bezel ---------- */
 
 .retro-bezel {
   position: relative;
-  width: 100%;
-  max-width: 800px;
-  height: 600px;
-  background: linear-gradient(to bottom, #1a1a1a 0%, #0f0f0f 50%, #000000 100%);
-  border: 20px solid #222;
-  border-radius: 10px;
-  box-shadow:
-    inset 0 0 20px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(0, 255, 255, 0.3);
+  overflow: hidden;
+  padding: 2.25vmin;
+  background: linear-gradient(135deg, #1d1d40 0%, #101028 45%, #292955 100%);
 }
+
+.retro-bezel::before,
+.retro-bezel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* vignette */
+
+.retro-bezel::before {
+  inset: 0;
+  box-shadow:
+    inset 0 0 120px rgba(0, 0, 0, 0.7),
+    inset 0 0 40px rgba(255, 255, 255, 0.03);
+}
+
+/* angled corners */
+
+.retro-bezel::after {
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 12%) top left,
+    linear-gradient(-135deg, rgba(255, 255, 255, 0.08), transparent 12%) top
+      right,
+    linear-gradient(45deg, rgba(255, 255, 255, 0.08), transparent 12%) bottom
+      left,
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.08), transparent 12%) bottom
+      right;
+  background-size: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+/* ---------- CRT Screen ---------- */
 
 .retro-screen {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #000;
   overflow: hidden;
-  border: 2px solid #333;
+
+  border-radius: 5vmin;
+
+  background: radial-gradient(
+    circle at center,
+    #45366a 0%,
+    #332651 55%,
+    #231938 100%
+  );
 }
+
+/* subtle screen curvature */
+
+.retro-screen::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 55%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+  pointer-events: none;
+}
+
+/* glossy reflection */
 
 .retro-glow {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    rgba(0, 255, 255, 0.1) 70%,
-    rgba(0, 255, 255, 0.3) 100%
-  );
+  inset: 0;
   pointer-events: none;
+  background: linear-gradient(
+    80deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.06) 68%,
+    transparent 100%
+  );
 }
+
+/* laser effect: rotating beams fanning out from a single point */
 
 .retro-laser {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    #00ffff 20%,
-    #00ffff 80%,
-    transparent 100%
-  );
-  animation: laserScan 2s linear infinite;
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 .retro-laser-origin {
   position: absolute;
-  width: 20px;
-  height: 100%;
+  inset: 0;
 }
 
 .retro-laser-origin-top {
-  top: 0;
+  --laser-origin-y: -30%;
 }
 
 .retro-laser-origin-bottom {
-  bottom: 0;
+  --laser-origin-y: 130%;
 }
 
 .retro-laser-layer {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    #00ffff 40%,
-    #00ffff 60%,
-    transparent 100%
+  top: var(--laser-origin-y, 50%);
+  left: 50%;
+  width: 340%;
+  height: 340%;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 120, 220, 0.28) 0deg 2deg,
+    transparent 2deg 18deg
   );
-}
-
-.retro-laser-layer-1 {
-  animation: laserLayer1 1.5s ease-in-out infinite;
+  opacity: 0.5;
+  animation: retro-laser-spin 20s linear infinite;
 }
 
 .retro-laser-layer-2 {
-  animation: laserLayer2 1.5s ease-in-out infinite;
-  animation-delay: 0.5s;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(120, 220, 255, 0.22) 0deg 1.5deg,
+    transparent 1.5deg 24deg
+  );
+  opacity: 0.35;
+  animation-duration: 26s;
+  animation-direction: reverse;
 }
+
+@keyframes retro-laser-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* grid + scanlines */
 
 .retro-grid {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.3;
+  inset: 0;
   pointer-events: none;
+  opacity: 0.45;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 120, 220, 0.22) 0,
+      rgba(255, 120, 220, 0.22) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 120, 220, 0.22) 0,
+      rgba(255, 120, 220, 0.22) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.32) 0,
+      rgba(0, 0, 0, 0.32) 2px,
+      transparent 2px,
+      transparent 4px
+    );
 }
+
+/* game/app content */
 
 .retro-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  color: #0ff;
-  font-family: "Press Start 2P", monospace;
-  text-align: center;
-  padding: 20px;
-  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: auto;
 }
 
-@keyframes laserScan {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
-  }
+/* ---------- Mobile Controls ---------- */
+
+.mobile-controls {
+  display: none;
 }
 
-@keyframes laserLayer1 {
-  0%,
-  100% {
-    transform: translateX(0);
+@media (max-width: 768px) {
+  .retro-layout {
+    /* Screen takes remaining space, controls only as much as needed */
+    grid-template-rows: minmax(0, 1fr) auto;
   }
-  50% {
-    transform: translateX(-20%);
-  }
-}
 
-@keyframes laserLayer2 {
-  0%,
-  100% {
-    transform: translateX(0);
+  .mobile-controls {
+    display: grid;
+
+    /* Up to 2 rows */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(48px, auto);
+
+    gap: 12px;
+    padding: 12px 16px;
+
+    background: linear-gradient(#1a1a36, #101021);
+    border-top: 2px solid rgba(255, 255, 255, 0.06);
+
+    /* Don't grow forever */
+    max-height: calc(2 * 48px + 3 * 12px + 24px);
+    overflow-y: auto;
   }
-  50% {
-    transform: translateX(20%);
+
+  /* Hide completely if nothing is rendered */
+  .mobile-controls:empty {
+    display: none;
+  }
+
+  /* If empty, let the screen occupy the whole viewport */
+  .retro-layout:has(.mobile-controls:empty) {
+    grid-template-rows: 1fr;
+  }
+
+  .mobile-controls > * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
   }
 }

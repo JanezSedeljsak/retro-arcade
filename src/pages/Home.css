@@ -1,0 +1,126 @@
+/* ---------- Home Page ---------- */
+
+.home {
+  padding: 4vmin;
+  color: #f1eaff;
+  text-align: center;
+}
+
+.home h1 {
+  margin: 0 0 0 0.3em;
+  font-size: clamp(3rem, 10vmin, 4rem);
+  color: #ff78dc;
+  text-shadow: 0 0 12px rgba(255, 120, 220, 0.5);
+}
+
+.home > p {
+  margin: 0;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  color: rgba(241, 234, 255, 0.7);
+}
+
+.game-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+}
+
+.game-card {
+  border-radius: 14px;
+  background: linear-gradient(160deg, #1d1d40ad 0%, #14142cc0 100%);
+  border: 2px solid rgba(255, 120, 220, 0.25);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.game-card:hover,
+.game-card:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(255, 120, 220, 0.6);
+  box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(255, 120, 220, 0.25);
+}
+
+.game-card-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 20px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.game-card-image {
+  display: block;
+  flex: 0 0 auto;
+  width: 88px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 120, 220, 0.2);
+}
+
+.game-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.game-card-title {
+  margin: 0 0 0.4em;
+  font-size: 1.4rem;
+  color: #ff78dc;
+}
+
+.game-card-description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: rgba(241, 234, 255, 0.65);
+}
+
+.game-card-leaderboard-btn {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 14px 20px 20px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 2px solid rgba(255, 120, 220, 0.4);
+  border-radius: 8px;
+  color: #ff78dc;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.game-card-leaderboard-btn:hover {
+  background: rgba(255, 120, 220, 0.12);
+  border-color: rgba(255, 120, 220, 0.7);
+}
+
+@media (max-width: 600px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-card-link {
+    flex-direction: column;
+  }
+
+  .game-card-image {
+    width: 100%;
+    aspect-ratio: 2;
+  }
+}
