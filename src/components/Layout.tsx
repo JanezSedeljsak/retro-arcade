@@ -15,18 +15,7 @@ export function Layout({ children }: LayoutProps) {
       <div className="retro-bezel">
         <div className="retro-screen">
           <div className="retro-glow" />
-          {isHome && (
-            <div className="retro-laser">
-              <div className="retro-laser-origin retro-laser-origin-top">
-                <div className="retro-laser-layer retro-laser-layer-1" />
-                <div className="retro-laser-layer retro-laser-layer-2" />
-              </div>
-              <div className="retro-laser-origin retro-laser-origin-bottom">
-                <div className="retro-laser-layer retro-laser-layer-1" />
-                <div className="retro-laser-layer retro-laser-layer-2" />
-              </div>
-            </div>
-          )}
+          {isHome && <div className="retro-laser" />}
           <div className="retro-grid" />
           <div className="retro-content">{children}</div>
         </div>

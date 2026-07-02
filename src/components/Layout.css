@@ -78,40 +78,40 @@
     #332651 55%,
     #231938 100%
   );
+
+  /* Disco palette (r, g, b) — every effect below derives from these two. */
+  --disco-purple: 190, 120, 255;
+  --disco-pink: 255, 120, 220;
 }
 
-/* subtle screen curvature */
+/* ---------- Screen Effects ---------- */
 
-.retro-screen::before {
-  content: "";
-  position: absolute;
-  inset: -8%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    transparent 55%,
-    rgba(0, 0, 0, 0.18) 100%
-  );
-  pointer-events: none;
-}
-
-/* glossy reflection */
-
+/* Soft purple bloom that slowly breathes, like light off a disco ball. */
 .retro-glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    80deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0) 35%,
-    rgba(255, 255, 255, 0.06) 68%,
-    transparent 100%
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 38%,
+    rgba(var(--disco-purple), 0.1),
+    transparent 70%
   );
+  animation: retro-glow-breathe 8s ease-in-out infinite;
 }
 
-/* laser effect: rotating beams fanning out from a single point */
+@keyframes retro-glow-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
 
+/* Laser fans: thin beams sweeping from a "disco ball" hung above the
+   screen (::before) and a dimmer counter-rotating reflection from below
+   (::after). Screen blending keeps them glowy without washing content. */
 .retro-laser {
   position: absolute;
   inset: 0;
@@ -120,46 +120,32 @@
   mix-blend-mode: screen;
 }
 
-.retro-laser-origin {
+.retro-laser::before,
+.retro-laser::after {
+  content: "";
   position: absolute;
-  inset: 0;
-}
-
-.retro-laser-origin-top {
-  --laser-origin-y: -30%;
-}
-
-.retro-laser-origin-bottom {
-  --laser-origin-y: 130%;
-}
-
-.retro-laser-layer {
-  position: absolute;
-  top: var(--laser-origin-y, 50%);
   left: 50%;
-  width: 300vw;
-  height: 300vw;
+  top: -30%;
+  width: 240vmax;
+  height: 240vmax;
   transform: translate(-50%, -50%);
   background: repeating-conic-gradient(
-    from 0deg,
-    rgba(255, 120, 220, 0.28) 0deg 2deg,
-    transparent 2deg 18deg
+    rgba(var(--disco-purple), 0.07) 0deg 1.5deg,
+    transparent 1.5deg 24deg
   );
-  opacity: 0.5;
-  animation: retro-laser-spin 20s linear infinite;
-  /* forces its own GPU layer so both beams reliably animate on iOS Safari */
+  animation: retro-laser-spin 46s linear infinite;
+  /* own GPU layer so the big rotating gradients stay smooth on mobile */
   will-change: transform;
   backface-visibility: hidden;
 }
 
-.retro-laser-layer-2 {
+.retro-laser::after {
+  top: 130%;
   background: repeating-conic-gradient(
-    from 0deg,
-    rgba(120, 220, 255, 0.22) 0deg 1.5deg,
-    transparent 1.5deg 24deg
+    rgba(var(--disco-pink), 0.05) 0deg 1.2deg,
+    transparent 1.2deg 30deg
   );
-  opacity: 0.35;
-  animation-duration: 26s;
+  animation-duration: 62s;
   animation-direction: reverse;
 }
 
@@ -169,40 +155,25 @@
   }
 }
 
-/* grid + scanlines */
-
+/* Faint purple grid — the arcade-cabinet glass texture. */
 .retro-grid {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.45;
-
   background-image:
     repeating-linear-gradient(
       to right,
-      rgba(255, 120, 220, 0.22) 0,
-      rgba(255, 120, 220, 0.22) 1px,
-      transparent 1px,
-      transparent 28px
+      rgba(var(--disco-purple), 0.07) 0 1px,
+      transparent 1px 32px
     ),
     repeating-linear-gradient(
       to bottom,
-      rgba(255, 120, 220, 0.22) 0,
-      rgba(255, 120, 220, 0.22) 1px,
-      transparent 1px,
-      transparent 28px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.32) 0,
-      rgba(0, 0, 0, 0.32) 2px,
-      transparent 2px,
-      transparent 4px
+      rgba(var(--disco-purple), 0.07) 0 1px,
+      transparent 1px 32px
     );
 }
 
-/* game/app content */
-
+/* Game/app content sits above the effect layers. */
 .retro-content {
   position: absolute;
   inset: 0;
@@ -210,51 +181,10 @@
   overflow: auto;
 }
 
-/* ---------- Mobile Controls ---------- */
-
-.mobile-controls {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .retro-layout {
-    /* Screen takes remaining space, controls only as much as needed */
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
-
-  .mobile-controls {
-    display: grid;
-
-    /* Up to 2 rows */
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-flow: row;
-    grid-auto-rows: minmax(48px, auto);
-
-    gap: 12px;
-    padding: 12px 16px;
-
-    background: linear-gradient(#1a1a36, #101021);
-    border-top: 2px solid rgba(255, 255, 255, 0.06);
-
-    /* Don't grow forever */
-    max-height: calc(2 * 48px + 3 * 12px + 24px);
-    overflow-y: auto;
-  }
-
-  /* Hide completely if nothing is rendered */
-  .mobile-controls:empty {
-    display: none;
-  }
-
-  /* If empty, let the screen occupy the whole viewport */
-  .retro-layout:has(.mobile-controls:empty) {
-    grid-template-rows: 1fr;
-  }
-
-  .mobile-controls > * {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;
+@media (prefers-reduced-motion: reduce) {
+  .retro-glow,
+  .retro-laser::before,
+  .retro-laser::after {
+    animation: none;
   }
 }
