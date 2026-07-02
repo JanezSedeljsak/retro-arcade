@@ -1,0 +1,155 @@
+.retro-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.retro-bezel {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+  background: linear-gradient(to bottom, #1a1a1a 0%, #0f0f0f 50%, #000000 100%);
+  border: 20px solid #222;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.retro-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  overflow: hidden;
+  border: 2px solid #333;
+}
+
+.retro-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(0, 255, 255, 0.1) 70%,
+    rgba(0, 255, 255, 0.3) 100%
+  );
+  pointer-events: none;
+}
+
+.retro-laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #00ffff 20%,
+    #00ffff 80%,
+    transparent 100%
+  );
+  animation: laserScan 2s linear infinite;
+  pointer-events: none;
+}
+
+.retro-laser-origin {
+  position: absolute;
+  width: 20px;
+  height: 100%;
+}
+
+.retro-laser-origin-top {
+  top: 0;
+}
+
+.retro-laser-origin-bottom {
+  bottom: 0;
+}
+
+.retro-laser-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #00ffff 40%,
+    #00ffff 60%,
+    transparent 100%
+  );
+}
+
+.retro-laser-layer-1 {
+  animation: laserLayer1 1.5s ease-in-out infinite;
+}
+
+.retro-laser-layer-2 {
+  animation: laserLayer2 1.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.retro-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.retro-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: #0ff;
+  font-family: "Press Start 2P", monospace;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@keyframes laserScan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes laserLayer1 {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-20%);
+  }
+}
+
+@keyframes laserLayer2 {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20%);
+  }
+}
