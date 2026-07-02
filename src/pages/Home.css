@@ -111,6 +111,10 @@
 }
 
 @media (max-width: 600px) {
+  .home {
+    padding: 4vmin 4vmin calc(4vmin + 128px);
+  }
+
   .game-grid {
     grid-template-columns: 1fr;
   }

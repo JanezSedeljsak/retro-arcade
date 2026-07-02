@@ -137,8 +137,8 @@
   position: absolute;
   top: var(--laser-origin-y, 50%);
   left: 50%;
-  width: 340%;
-  height: 340%;
+  width: 300vw;
+  height: 300vw;
   transform: translate(-50%, -50%);
   background: repeating-conic-gradient(
     from 0deg,
@@ -147,6 +147,9 @@
   );
   opacity: 0.5;
   animation: retro-laser-spin 20s linear infinite;
+  /* forces its own GPU layer so both beams reliably animate on iOS Safari */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .retro-laser-layer-2 {
