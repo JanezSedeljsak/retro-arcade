@@ -22,6 +22,19 @@
   background: linear-gradient(135deg, #1d1d40 0%, #101028 45%, #292955 100%);
 }
 
+/* Clears the dynamic island / notch and home indicator on phones — top
+   and bottom in portrait, left and right in landscape where the notch
+   sits on a side edge instead. Safe-area insets are 0 on devices without
+   them, so this is a no-op there. */
+@media (max-width: 768px) {
+  .retro-bezel {
+    padding-top: calc(2.25vmin + env(safe-area-inset-top));
+    padding-bottom: calc(2.25vmin + env(safe-area-inset-bottom));
+    padding-left: calc(2.25vmin + env(safe-area-inset-left));
+    padding-right: calc(2.25vmin + env(safe-area-inset-right));
+  }
+}
+
 .retro-bezel::before,
 .retro-bezel::after {
   content: "";
