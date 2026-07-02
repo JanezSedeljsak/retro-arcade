@@ -38,6 +38,14 @@ cleanup/teardown). `GameCanvas` calls `start` in a `useEffect` and invokes the
 returned cleanup on unmount. To add a new game: create `src/games/<id>/index.ts`
 with a `start` function, and add an entry to `src/games/registry.ts`.
 
+## Searching the codebase
+
+`node_modules` is gitignored and not part of this project's source — never
+search, grep, or glob through it. Scope searches to `src/`, `public/`, and
+root config files, or explicitly exclude `node_modules` (e.g.
+`grep -r --exclude-dir=node_modules`, `rg` already respects `.gitignore` by
+default).
+
 ## Rules for AI-written code
 
 - **No new dependencies.** Do not add, suggest, or install new npm packages.
