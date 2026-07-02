@@ -5,3 +5,20 @@ create table scores (
   score int not null,
   created_at timestamptz default now()
 );
+
+create or replace function top_scores(p_game_id text)
+returns setof scores
+language sql
+stable
+as $$
+  select id, game_id, username, score, created_at
+  from (
+    select *,
+      row_number() over (partition by username order by score desc) as rn
+    from scores
+    where game_id = p_game_id
+  ) ranked
+  where rn <= 3
+  order by score desc
+  limit 30;
+$$;

@@ -1,6 +1,7 @@
 /* ---------- Game Page ---------- */
 
 .game-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -44,13 +45,12 @@
   color: var(--fg-dim);
 }
 
-/* Touch controls bar; the joystick floats 100px above its layout slot
-   (over whatever is there) — pointer-events pass through except on the
-   joystick itself. */
+/* The joystick overlays the bottom-right of the panel so it takes no
+   layout space — the field keeps the full height (esp. in landscape).
+   pointer-events pass through except on the joystick itself. */
 .game-controls {
-  display: flex;
-  justify-content: flex-end;
-  padding: 12px 4vmin calc(12px + env(safe-area-inset-bottom));
-  transform: translateY(-100px);
+  position: absolute;
+  right: 4vmin;
+  bottom: calc(32px + env(safe-area-inset-bottom));
   pointer-events: none;
 }

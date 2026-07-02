@@ -23,17 +23,25 @@ export default defineConfig({
         display: "standalone",
         start_url: "/retro-arcade/",
         scope: "/retro-arcade/",
+        // Tab icon is favicon.ico (linked in index.html); the manifest
+        // wants real PNG sizes for install/home-screen icons.
         icons: [
           {
-            src: "favicon.svg",
-            sizes: "any",
-            type: "image/svg+xml",
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
             purpose: "any",
           },
           {
-            src: "favicon.svg",
-            sizes: "any",
-            type: "image/svg+xml",
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
             purpose: "maskable",
           },
         ],

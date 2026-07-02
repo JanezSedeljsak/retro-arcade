@@ -15,19 +15,23 @@ export function getStoredUsername() {
   return localStorage.getItem(LEADERBOARD_USERNAME_KEY) ?? "";
 }
 
-function fetchScores(gameId: string) {
+async function fetchScores(gameId: string) {
   try {
-    return getSupabase()
-      .from("scores")
-      .select("*")
-      .eq("game_id", gameId)
-      .order("score", { ascending: false })
-      .limit(30);
+    const { data, error } = await getSupabase().rpc("top_scores", {
+      p_game_id: gameId,
+    });
+
+    if (error) {
+      console.error("Error loading scores:", error);
+      return { data: null, error };
+    }
+
+    return { data: (data ?? []) as Score[], error: null };
   } catch (e) {
-    return Promise.resolve({
+    return {
       data: null,
       error: { message: (e as Error).message },
-    });
+    };
   }
 }
 

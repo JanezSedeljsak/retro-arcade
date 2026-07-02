@@ -46,6 +46,11 @@ const BOARD_BACKGROUND: [number, number, number, number] = [0, 0, 0, 0];
  * Call `endGame()` when the run finishes.
  */
 export abstract class BaseGame {
+  /** kaplay caches font atlases module-wide by font name, and an atlas
+      created before a quit() belongs to that dead WebGL context — reusing
+      its name after re-init draws text as black boxes. A unique name per
+      engine instance always gets a fresh atlas. */
+  private static fontInstance = 0;
   /** Touch controls this game uses; override in subclasses that need them. */
   readonly controls: GameControls = { joystick: false, press: false };
   /** The kaplay engine instance — build the scene through this. */
@@ -63,6 +68,24 @@ export abstract class BaseGame {
   /** Normalized joystick tilt (-1..1 per axis), fed by the TouchJoystick. */
   private joystickX = 0;
   private joystickY = 0;
+  private portraitQuery = window.matchMedia("(orientation: portrait)");
+
+  /** Board fills the screen while keeping its aspect ratio: full width in
+      portrait, full height in landscape — the remaining max-* cap lets the
+      browser re-resolve the other axis when the preferred one won't fit. */
+  private applyCanvasSizing = () => {
+    if (this.portraitQuery.matches) {
+      this.canvas.style.width = "100%";
+      this.canvas.style.height = "auto";
+      this.canvas.style.maxWidth = "";
+      this.canvas.style.maxHeight = "100%";
+    } else {
+      this.canvas.style.width = "auto";
+      this.canvas.style.height = "100%";
+      this.canvas.style.maxWidth = "100%";
+      this.canvas.style.maxHeight = "";
+    }
+  };
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -73,21 +96,22 @@ export abstract class BaseGame {
     this.onGameOver = onGameOver;
     this.width = options?.width ?? GAME_WIDTH;
     this.height = options?.height ?? GAME_HEIGHT;
+    const fontName = `vt323-${BaseGame.fontInstance++}`;
     this._k = kaplay({
       canvas,
       width: this.width,
       height: this.height,
       global: false,
       background: BOARD_BACKGROUND,
+      font: fontName,
     });
+    // The app font, served from public/ — matches the rest of the UI.
+    this._k.loadFont(fontName, `${import.meta.env.BASE_URL}fonts/vt323.ttf`);
 
-    // kaplay overwrites canvas.style on init, so apply our sizing after.
-    // width/height stay "auto" so the canvas keeps its intrinsic aspect
-    // ratio (from the board size above) while maxWidth/maxHeight scale it.
-    canvas.style.width = "auto";
-    canvas.style.height = "auto";
-    canvas.style.maxWidth = "100%";
-    canvas.style.maxHeight = "100%";
+    // kaplay overwrites canvas.style on init, so apply our sizing after —
+    // and again whenever the device flips between portrait and landscape.
+    this.applyCanvasSizing();
+    this.portraitQuery.addEventListener("change", this.applyCanvasSizing);
     canvas.style.border = "min(0.6vmin, 4px) solid rgba(255, 120, 220, 0.6)";
     canvas.style.borderRadius = "min(1vmin, 8px)";
 
@@ -155,6 +179,7 @@ export abstract class BaseGame {
 
   /** Tear down the engine. Called on unmount; override for extra cleanup. */
   destroy(): void {
+    this.portraitQuery.removeEventListener("change", this.applyCanvasSizing);
     this._k.quit();
   }
 
