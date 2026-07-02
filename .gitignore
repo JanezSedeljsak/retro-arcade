@@ -24,3 +24,5 @@ dist-ssr
 
 .openclaw/*
 !.openclaw/openclaw.example.json
+
+.env
