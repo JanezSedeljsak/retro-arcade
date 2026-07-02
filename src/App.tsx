@@ -5,13 +5,13 @@ import { GamePage } from "@/pages/Game";
 
 export default function App() {
   return (
-    <Layout>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/games/:gameId" element={<GamePage />} />
         </Routes>
-      </BrowserRouter>
-    </Layout>
+      </Layout>
+    </BrowserRouter>
   );
 }

@@ -156,6 +156,62 @@ h3,
   );
 }
 
+/* laser effect: rotating beams fanning out from a single point */
+
+.retro-laser {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.retro-laser-origin {
+  position: absolute;
+  inset: 0;
+}
+
+.retro-laser-origin-top {
+  --laser-origin-y: -30%;
+}
+
+.retro-laser-origin-bottom {
+  --laser-origin-y: 130%;
+}
+
+.retro-laser-layer {
+  position: absolute;
+  top: var(--laser-origin-y, 50%);
+  left: 50%;
+  width: 340%;
+  height: 340%;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 120, 220, 0.28) 0deg 2deg,
+    transparent 2deg 18deg
+  );
+  opacity: 0.5;
+  animation: retro-laser-spin 20s linear infinite;
+}
+
+.retro-laser-layer-2 {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(120, 220, 255, 0.22) 0deg 1.5deg,
+    transparent 1.5deg 24deg
+  );
+  opacity: 0.35;
+  animation-duration: 26s;
+  animation-direction: reverse;
+}
+
+@keyframes retro-laser-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 /* grid + scanlines */
 
 .retro-grid {
@@ -281,7 +337,7 @@ h3,
 
 .game-card {
   border-radius: 14px;
-  background: linear-gradient(160deg, #1d1d40 0%, #14142c 100%);
+  background: linear-gradient(160deg, #1d1d40ad 0%, #14142cc0 100%);
   border: 2px solid rgba(255, 120, 220, 0.25);
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.4);
   transition:
@@ -369,7 +425,7 @@ h3,
 
   .game-card-image {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 2;
   }
 }
 
