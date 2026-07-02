@@ -11,9 +11,12 @@ const styles: { canvas: CSSProperties } = {
 export function GameCanvas({
   Game,
   onGameOver,
+  onGameReady,
 }: {
   Game: GameConstructor;
   onGameOver?: (score: number) => void;
+  /** Fires with the live instance once created, and null on teardown. */
+  onGameReady?: (game: BaseGame | null) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -29,12 +32,14 @@ export function GameCanvas({
     let game: BaseGame | undefined;
     const frame = requestAnimationFrame(() => {
       game = new Game(canvas, onGameOver);
+      onGameReady?.(game);
     });
 
     return () => {
       cancelAnimationFrame(frame);
       game?.destroy();
+      onGameReady?.(null);
     };
-  }, [Game, onGameOver]);
+  }, [Game, onGameOver, onGameReady]);
   return <canvas ref={ref} style={styles.canvas} />;
 }

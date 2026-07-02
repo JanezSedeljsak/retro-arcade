@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { getStoredUsername, useLeaderboard } from "@/hooks/useLeaderboard";
+import { games } from "@/games/registry";
 import "./LeaderboardModal.css";
 
 function formatTimestamp(isoDate: string) {
@@ -23,6 +24,8 @@ export function LeaderboardModal({
   score,
 }: LeaderboardModalProps) {
   const { scores, loading, error, submitScore } = useLeaderboard(gameId);
+  // Time-based games store negated elapsed seconds — shown as "Time".
+  const isTimeBased = games.find((g) => g.id === gameId)?.isTimeBased ?? false;
   const [username, setUsername] = useState(getStoredUsername);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -50,7 +53,10 @@ export function LeaderboardModal({
 
   return (
     <div className="leaderboard-overlay" onClick={onClose}>
-      <div className="leaderboard-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="retro-panel leaderboard-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="leaderboard-modal-header">
           <h2>{title} Leaderboard</h2>
           <button
@@ -65,12 +71,16 @@ export function LeaderboardModal({
 
         {showForm && (
           <form className="leaderboard-submit" onSubmit={handleSubmit}>
-            <p className="leaderboard-score">You scored {Math.abs(score)}!</p>
+            <p className="leaderboard-score">
+              {isTimeBased
+                ? `You finished in ${Math.abs(score)}s!`
+                : `You scored ${Math.abs(score)}!`}
+            </p>
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your name"
-              maxLength={20}
+              maxLength={12}
               required
               autoFocus
             />
@@ -92,7 +102,9 @@ export function LeaderboardModal({
               <span className="leaderboard-rank">#</span>
               <span className="leaderboard-name">Player</span>
               <span className="leaderboard-date">Date</span>
-              <span className="leaderboard-points">Score</span>
+              <span className="leaderboard-points">
+                {isTimeBased ? "Time" : "Score"}
+              </span>
             </div>
             <ol className="leaderboard-list">
               {scores.map((s, i) => (
@@ -104,6 +116,7 @@ export function LeaderboardModal({
                   </span>
                   <span className="leaderboard-points">
                     {Math.abs(s.score)}
+                    {isTimeBased ? "s" : ""}
                   </span>
                 </li>
               ))}

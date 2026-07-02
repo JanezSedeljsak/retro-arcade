@@ -17,6 +17,7 @@ import {
   BaseGame,
   GAME_WIDTH,
   GAME_HEIGHT,
+  type GameControls,
   type GameOverHandler,
 } from "@/games/base";
 
@@ -59,6 +60,7 @@ type ScoreText = GameObj<
 >;
 
 export class PongGame extends BaseGame {
+  readonly controls: GameControls = { joystick: true, press: false };
   private player: Paddle;
   private bot: Paddle;
   private ball: Ball;
@@ -123,20 +125,20 @@ export class PongGame extends BaseGame {
     ]);
 
     this.serveBall(k.choose([-1, 1]));
+  }
 
-    k.onKeyDown("w", () => {
-      this.player.pos.y = Math.max(
-        PADDLE_HEIGHT / 2,
-        this.player.pos.y - PADDLE_SPEED * k.dt(),
-      );
-    });
+  protected moveUp() {
+    this.player.pos.y = Math.max(
+      PADDLE_HEIGHT / 2,
+      this.player.pos.y - PADDLE_SPEED * this._k.dt(),
+    );
+  }
 
-    k.onKeyDown("s", () => {
-      this.player.pos.y = Math.min(
-        GAME_HEIGHT - PADDLE_HEIGHT / 2,
-        this.player.pos.y + PADDLE_SPEED * k.dt(),
-      );
-    });
+  protected moveDown() {
+    this.player.pos.y = Math.min(
+      GAME_HEIGHT - PADDLE_HEIGHT / 2,
+      this.player.pos.y + PADDLE_SPEED * this._k.dt(),
+    );
   }
 
   restart() {
@@ -153,7 +155,7 @@ export class PongGame extends BaseGame {
   // score, negated so that a faster win yields a larger (better) value.
   // Rounded because the scores table stores score as an integer.
   calculateScore() {
-    const elapsedSeconds = (Date.now() - this.startTime) / 1000;
+    const elapsedSeconds = (performance.now() - this.startTime) / 1000;
     return -Math.round(elapsedSeconds);
   }
 
@@ -190,24 +192,28 @@ export class PongGame extends BaseGame {
     // A goal counts as soon as the ball touches the left or right side.
     if (ball.pos.x - BALL_RADIUS <= GOAL_WIDTH && ball.vel.x < 0) {
       this.botScore++;
-      this.updateScoreText();
       this.serveBall(1);
     } else if (
       ball.pos.x + BALL_RADIUS >= GAME_WIDTH - GOAL_WIDTH &&
       ball.vel.x > 0
     ) {
       this.playerScore++;
-      this.updateScoreText();
       if (this.playerScore >= WINNING_SCORE) {
         this.endGame();
       } else {
         this.serveBall(-1);
       }
     }
+
+    // Refreshed every frame so the elapsed time ticks; runs after goal
+    // handling so the winning frame still shows the final score and time.
+    this.updateScoreText();
   }
 
   private updateScoreText() {
-    this.scoreText.text = `${this.playerScore} : ${this.botScore}`;
+    // calculateScore() is the negated elapsed time — abs gives the seconds.
+    const elapsedSeconds = Math.abs(this.calculateScore());
+    this.scoreText.text = `${this.playerScore} : ${this.botScore} (${elapsedSeconds}s)`;
   }
 
   private serveBall(direction: number) {

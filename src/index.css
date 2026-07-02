@@ -15,6 +15,25 @@
   font-display: swap;
 }
 
+/* ---------- Theme ----------
+   Single source for the palette and shared chrome — use these vars (and
+   .retro-panel / .default-btn) instead of hardcoding colors per file. */
+:root {
+  /* Accent colors; the -rgb variants exist for rgba(...) alpha variations. */
+  --pink: #ff78dc;
+  --pink-rgb: 255, 120, 220;
+  --purple-rgb: 190, 120, 255;
+
+  /* Foreground text at the three intensities the app uses. */
+  --fg: #f1eaff;
+  --fg-dim: rgba(241, 234, 255, 0.7);
+  --fg-faint: rgba(241, 234, 255, 0.5);
+
+  /* Corner radii: panels (cards, modals) vs small controls (buttons, inputs). */
+  --panel-radius: 14px;
+  --control-radius: 8px;
+}
+
 *,
 *::before,
 *::after {
@@ -43,13 +62,22 @@ h3 {
   font-weight: normal;
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Shared chrome ---------- */
+
+/* Panel look shared by game cards and modals. */
+.retro-panel {
+  border-radius: var(--panel-radius);
+  border: 2px solid rgba(var(--pink-rgb), 0.4);
+  background: linear-gradient(160deg, #1d1d40 0%, #14142c 100%);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.4);
+}
+
 .default-btn {
   padding: 8px 12px;
   background: transparent;
-  border: 2px solid rgba(255, 120, 220, 0.4);
-  border-radius: 8px;
-  color: #ff78dc;
+  border: 2px solid rgba(var(--pink-rgb), 0.4);
+  border-radius: var(--control-radius);
+  color: var(--pink);
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
@@ -59,8 +87,8 @@ h3 {
 }
 
 .default-btn:hover {
-  background: rgba(255, 120, 220, 0.12);
-  border-color: rgba(255, 120, 220, 0.7);
+  background: rgba(var(--pink-rgb), 0.12);
+  border-color: rgba(var(--pink-rgb), 0.7);
 }
 
 .default-btn:disabled {
@@ -70,5 +98,5 @@ h3 {
 
 .default-btn:disabled:hover {
   background: transparent;
-  border-color: rgba(255, 120, 220, 0.4);
+  border-color: rgba(var(--pink-rgb), 0.4);
 }

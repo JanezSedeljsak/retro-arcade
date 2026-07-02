@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { qrcode } from "vite-plugin-qrcode";
 import path from "path";
 
 // https://vite.dev/config/
@@ -8,6 +9,8 @@ export default defineConfig({
   base: "/retro-arcade/",
   plugins: [
     react(),
+    // Dev-only: prints a scannable QR of the network URL on startup.
+    qrcode(),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {

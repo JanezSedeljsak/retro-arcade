@@ -23,7 +23,7 @@ export function Home() {
       <p>Welcome to the Retro Arcade!</p>
       <ul className="game-grid">
         {games.map((game) => (
-          <li key={game.id} className="game-card">
+          <li key={game.id} className="retro-panel game-card">
             <Link to={`/games/${game.id}`} className="game-card-link">
               <img
                 src={`${import.meta.env.BASE_URL}images/game-placeholder.svg`}

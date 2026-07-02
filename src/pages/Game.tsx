@@ -2,8 +2,14 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { lazy, useMemo, useState, useCallback, Suspense } from "react";
 import { games, gameExportName } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
-import type { GameConstructor } from "@/games/base";
+import { TouchJoystick } from "@/components/TouchJoystick";
+import type { BaseGame, GameConstructor } from "@/games/base";
 import "./Game.css";
+
+// Coarse pointer = touch-first device (phone/tablet) — gets on-screen controls.
+const IS_TOUCH_DEVICE =
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(pointer: coarse)").matches;
 
 const gameModules = import.meta.glob<Record<string, GameConstructor>>(
   "../games/*/index.ts",
@@ -23,9 +29,11 @@ function resolveLoader(gameId: string) {
 function LazyGame({
   gameId,
   onGameOver,
+  onGameReady,
 }: {
   gameId: string;
   onGameOver: (score: number) => void;
+  onGameReady: (game: BaseGame | null) => void;
 }) {
   const loader = resolveLoader(gameId);
 
@@ -41,7 +49,13 @@ function LazyGame({
       }
       return {
         default: function GameHost() {
-          return <GameCanvas Game={GameClass} onGameOver={onGameOver} />;
+          return (
+            <GameCanvas
+              Game={GameClass}
+              onGameOver={onGameOver}
+              onGameReady={onGameReady}
+            />
+          );
         },
       };
     });
@@ -60,12 +74,20 @@ export function GamePage() {
   const { gameId } = useParams<{ gameId: string }>();
   const meta = games.find((g) => g.id === gameId);
   const [finalScore, setFinalScore] = useState<number | null>(null);
+  const [game, setGame] = useState<BaseGame | null>(null);
 
   const handleGameOver = useCallback((score: number) => {
     setFinalScore(score);
   }, []);
 
+  const handleGameReady = useCallback((g: BaseGame | null) => {
+    setGame(g);
+  }, []);
+
   if (!gameId) return <Navigate to="/" replace />;
+
+  const showJoystick =
+    IS_TOUCH_DEVICE && game !== null && game.controls.joystick;
 
   return (
     <div className="game-panel">
@@ -76,8 +98,17 @@ export function GamePage() {
         <h2 className="game-title">{meta?.title ?? gameId}</h2>
       </div>
       <div className="game-viewport">
-        <LazyGame gameId={gameId} onGameOver={handleGameOver} />
+        <LazyGame
+          gameId={gameId}
+          onGameOver={handleGameOver}
+          onGameReady={handleGameReady}
+        />
       </div>
+      {showJoystick && (
+        <div className="game-controls">
+          <TouchJoystick onChange={(x, y) => game.setJoystickDirection(x, y)} />
+        </div>
+      )}
       {finalScore !== null && (
         <Suspense fallback={null}>
           <LeaderboardModal

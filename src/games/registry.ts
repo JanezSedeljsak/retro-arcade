@@ -2,6 +2,8 @@ export type GameMeta = {
   id: string;
   title: string;
   description: string;
+  /** Score is elapsed seconds (lower = better) — leaderboard shows "Time". */
+  isTimeBased?: boolean;
 };
 
 /**
@@ -23,12 +25,14 @@ export const games: GameMeta[] = [
     id: "pong",
     title: "Pong",
     description:
-      "Classic paddle game — beat the bot to 7! W/S or ▲▼ on mobile.",
+      "Classic paddle game — beat the bot to 5! W/S, arrows, or the joystick.",
+    isTimeBased: true,
   },
   {
     id: "space-invaders",
     title: "Space Invaders",
     description: "Defend Earth from endless waves of invading aliens.",
+    isTimeBased: true,
   },
   {
     id: "whirlybird",

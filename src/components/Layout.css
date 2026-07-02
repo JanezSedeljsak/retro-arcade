@@ -13,14 +13,6 @@
   );
 }
 
-/* Mobile gets extra button area */
-
-@media (max-width: 768px) {
-  .retro-layout {
-    grid-template-rows: 1fr 22vh;
-  }
-}
-
 /* ---------- Outer Bezel ---------- */
 
 .retro-bezel {
@@ -78,10 +70,6 @@
     #332651 55%,
     #231938 100%
   );
-
-  /* Disco palette (r, g, b) — every effect below derives from these two. */
-  --disco-purple: 190, 120, 255;
-  --disco-pink: 255, 120, 220;
 }
 
 /* ---------- Screen Effects ---------- */
@@ -93,7 +81,7 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse 80% 60% at 50% 38%,
-    rgba(var(--disco-purple), 0.1),
+    rgba(var(--purple-rgb), 0.1),
     transparent 70%
   );
   animation: retro-glow-breathe 8s ease-in-out infinite;
@@ -130,7 +118,7 @@
   height: 240vmax;
   transform: translate(-50%, -50%);
   background: repeating-conic-gradient(
-    rgba(var(--disco-purple), 0.07) 0deg 1.5deg,
+    rgba(var(--purple-rgb), 0.07) 0deg 1.5deg,
     transparent 1.5deg 24deg
   );
   animation: retro-laser-spin 46s linear infinite;
@@ -142,7 +130,7 @@
 .retro-laser::after {
   top: 130%;
   background: repeating-conic-gradient(
-    rgba(var(--disco-pink), 0.05) 0deg 1.2deg,
+    rgba(var(--pink-rgb), 0.05) 0deg 1.2deg,
     transparent 1.2deg 30deg
   );
   animation-duration: 62s;
@@ -163,13 +151,13 @@
   background-image:
     repeating-linear-gradient(
       to right,
-      rgba(var(--disco-purple), 0.07) 0 1px,
-      transparent 1px 32px
+      rgba(var(--purple-rgb), 0.07) 0 1px,
+      transparent 1px 128px
     ),
     repeating-linear-gradient(
       to bottom,
-      rgba(var(--disco-purple), 0.07) 0 1px,
-      transparent 1px 32px
+      rgba(var(--purple-rgb), 0.07) 0 1px,
+      transparent 1px 128px
     );
 }
 

@@ -30,6 +30,7 @@ src/
   components/
     Layout.tsx              # page shell/nav wrapper
     GameCanvas.tsx          # canvas host, instantiates a game class on <canvas>
+    TouchJoystick.tsx       # drag joystick for touch devices (GamePage renders it)
     LeaderboardModal.tsx    # score list + submit form (lazy-loaded)
   pages/
     Home.tsx                # game grid + leaderboard entry points
@@ -69,15 +70,25 @@ export class MyGame extends BaseGame {
 
 What `BaseGame` owns (don't redo any of this in games):
 
-- **The engine** — `this._k` is the kaplay instance, created on a
-  `GAME_WIDTH`×`GAME_HEIGHT` board with the themed background and canvas
-  sizing/border already applied. `destroy()` (called by `GameCanvas` on
-  unmount) quits it; override only if you have extra cleanup.
+- **The engine** — `this._k` is the kaplay instance, with the themed
+  background and canvas sizing/border already applied. The board defaults
+  to the 16:9 `GAME_WIDTH`×`GAME_HEIGHT`; pass `{ width, height }` as the
+  third `super()` argument for other aspect ratios (the square games use
+  a `BOARD_SIZE`×`BOARD_SIZE` board — see `stacktower`). `destroy()`
+  (called by `GameCanvas` on unmount) quits it; override only if you have
+  extra cleanup.
 - **The frame loop** — implement `update()`; the base wires it to
   `this._k.onUpdate` and stops calling it when `this.gameOver` is set.
 - **Restart** — "r" is bound to `restart()`, which resets
   score/startTime/gameOver. Override it, call `super.restart()`, then
   rebuild your run state.
+- **Input** — override the hooks you need: `moveUp/moveDown/moveLeft/
+moveRight()` fire every frame while WASD/arrows are held or the touch
+  joystick is tilted; `press()` fires on canvas tap/click or Space (shoot,
+  cut, …). Never bind movement/action keys yourself. Declare what the game
+  uses via `controls` (`{ joystick, press }` booleans) — on touch devices
+  `GamePage` renders the `TouchJoystick` below the field when `joystick` is
+  true; `press` needs no extra UI (the canvas itself is the button).
 - **Score** — accumulate points in `this.score`; the default
   `calculateScore()` returns it. Override `calculateScore()` for other
   schemes (pong returns negated elapsed seconds so faster wins rank
@@ -114,7 +125,10 @@ To add a game: create `src/games/<id>/index.ts` exporting the
 - **Styling:** inline `const styles: { ... } = { ... }` of `CSSProperties`
   for simple cases — no hover/focus, animations, or media queries, under
   ~30 lines (see `GameCanvas.tsx`). Otherwise a colocated `.css` file (see
-  `Layout.css`, `LeaderboardModal.css`).
+  `Layout.css`, `LeaderboardModal.css`). The palette and shared chrome live
+  in `index.css` — use the `:root` vars (`--pink`, `--pink-rgb`, `--fg`, …)
+  and the `.retro-panel` / `.default-btn` classes instead of hardcoding
+  colors or re-declaring panel/button looks.
 - **Named exports only** — no default exports in `src/` (they don't enforce
   a name at the import site; ESLint's `no-restricted-exports` errors on
   them). Root configs (`vite.config.ts`, `eslint.config.js`) are the only

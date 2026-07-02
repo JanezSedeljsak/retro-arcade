@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  color: #f1eaff;
+  color: var(--fg);
 }
 
 .game-header {
@@ -12,11 +12,11 @@
   align-items: center;
   gap: 16px;
   padding: 12px 4vmin;
-  border-bottom: 2px solid rgba(255, 120, 220, 0.2);
+  border-bottom: 2px solid rgba(var(--pink-rgb), 0.2);
 }
 
 .game-back-link {
-  color: #ff78dc;
+  color: var(--pink);
   text-decoration: none;
   font-size: 1.4rem;
   white-space: nowrap;
@@ -29,7 +29,7 @@
 .game-title {
   margin: 0;
   font-size: 2rem;
-  color: #f1eaff;
+  color: var(--fg);
 }
 
 .game-viewport {
@@ -41,5 +41,16 @@
 }
 
 .game-loading {
-  color: rgba(241, 234, 255, 0.7);
+  color: var(--fg-dim);
+}
+
+/* Touch controls bar; the joystick floats 100px above its layout slot
+   (over whatever is there) — pointer-events pass through except on the
+   joystick itself. */
+.game-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 4vmin calc(12px + env(safe-area-inset-bottom));
+  transform: translateY(-100px);
+  pointer-events: none;
 }
