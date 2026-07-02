@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
 import { GamePage } from "@/pages/Game";
 
-export default function App() {
+export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Layout>

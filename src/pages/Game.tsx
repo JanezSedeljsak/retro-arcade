@@ -1,15 +1,13 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { lazy, useMemo, useState, useCallback, Suspense } from "react";
-import { games } from "@/games/registry";
+import { games, gameExportName } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
+import type { GameConstructor } from "@/games/base";
 import "./Game.css";
 
-const gameModules = import.meta.glob<{
-  start: (
-    c: HTMLCanvasElement,
-    onGameOver?: (score: number) => void,
-  ) => () => void;
-}>("../games/*/index.ts");
+const gameModules = import.meta.glob<Record<string, GameConstructor>>(
+  "../games/*/index.ts",
+);
 
 const LeaderboardModal = lazy(() =>
   import("@/components/LeaderboardModal").then((m) => ({
@@ -35,9 +33,15 @@ function LazyGame({
     if (!loader) return null;
     return lazy(async () => {
       const mod = await loader();
+      const GameClass = mod[gameExportName(gameId)];
+      if (!GameClass) {
+        throw new Error(
+          `src/games/${gameId}/index.ts must export class ${gameExportName(gameId)}`,
+        );
+      }
       return {
-        default: function Game() {
-          return <GameCanvas start={mod.start} onGameOver={onGameOver} />;
+        default: function GameHost() {
+          return <GameCanvas Game={GameClass} onGameOver={onGameOver} />;
         },
       };
     });

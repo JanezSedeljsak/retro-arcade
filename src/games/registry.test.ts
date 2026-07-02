@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { games } from "@/games/registry";
+import { games, gameExportName } from "@/games/registry";
+import { BaseGame, type GameConstructor } from "@/games/base";
 
-const gameModules = import.meta.glob<{
-  start: (c: HTMLCanvasElement) => () => void;
-}>("./*/index.ts");
+const gameModules = import.meta.glob<Record<string, GameConstructor>>(
+  "./*/index.ts",
+);
 
 describe("games registry", () => {
   it("has at least one game", () => {
@@ -29,21 +30,22 @@ describe("games registry", () => {
     }
   });
 
-  it("every game has an index.ts exporting a start(canvas) function", async () => {
+  it("every game exports a correctly named BaseGame subclass", async () => {
     for (const game of games) {
       const key = `./${game.id}/index.ts`;
       const loader = gameModules[key];
       expect(loader, `missing src/games/${game.id}/index.ts`).toBeDefined();
 
+      const exportName = gameExportName(game.id);
       const mod = await loader();
       expect(
-        typeof mod.start,
-        `src/games/${game.id}/index.ts must export a "start" function`,
+        typeof mod[exportName],
+        `src/games/${game.id}/index.ts must export class ${exportName}`,
       ).toBe("function");
       expect(
-        mod.start.length,
-        `src/games/${game.id}'s start must take exactly one argument (the canvas)`,
-      ).toBeGreaterThanOrEqual(1);
+        mod[exportName].prototype instanceof BaseGame,
+        `src/games/${game.id}'s ${exportName} must extend BaseGame`,
+      ).toBe(true);
     }
   });
 });

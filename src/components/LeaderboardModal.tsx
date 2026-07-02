@@ -24,6 +24,7 @@ export function LeaderboardModal({
 }: LeaderboardModalProps) {
   const { scores, loading, error, submitScore } = useLeaderboard(gameId);
   const [username, setUsername] = useState(getStoredUsername);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -36,9 +37,13 @@ export function LeaderboardModal({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (submitting || submitted) return;
     if (!username.trim() || score === undefined) return;
-    await submitScore(username.trim(), score);
-    setSubmitted(true);
+    setSubmitting(true);
+    const ok = await submitScore(username.trim(), score);
+    setSubmitting(false);
+    // Stay on the form after a failed submit so the score can be retried.
+    setSubmitted(ok);
   }
 
   const showForm = score !== undefined && !submitted;
@@ -69,8 +74,8 @@ export function LeaderboardModal({
               required
               autoFocus
             />
-            <button type="submit" className="default-btn">
-              Submit Score
+            <button type="submit" className="default-btn" disabled={submitting}>
+              {submitting ? "Submitting…" : "Submit Score"}
             </button>
           </form>
         )}

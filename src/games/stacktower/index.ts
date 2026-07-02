@@ -1,1 +1,5 @@
-export function start(_canvas: HTMLCanvasElement) {}
+import { BaseGame } from "@/games/base";
+
+export class StacktowerGame extends BaseGame {
+  protected update() {}
+}

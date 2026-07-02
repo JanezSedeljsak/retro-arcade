@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
+import type { BaseGame, GameConstructor } from "@/games/base";
 
 const styles: { canvas: CSSProperties } = {
   canvas: {
@@ -8,13 +9,10 @@ const styles: { canvas: CSSProperties } = {
 };
 
 export function GameCanvas({
-  start,
+  Game,
   onGameOver,
 }: {
-  start: (
-    c: HTMLCanvasElement,
-    onGameOver?: (score: number) => void,
-  ) => () => void;
+  Game: GameConstructor;
   onGameOver?: (score: number) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -28,15 +26,15 @@ export function GameCanvas({
     // deferred to the next frame - so defer the real init past that paint.
     // A genuine StrictMode remount cancels this rAF before it fires, and a
     // real single mount just runs one frame later.
-    let cleanup: (() => void) | undefined;
+    let game: BaseGame | undefined;
     const frame = requestAnimationFrame(() => {
-      cleanup = start(canvas, onGameOver);
+      game = new Game(canvas, onGameOver);
     });
 
     return () => {
       cancelAnimationFrame(frame);
-      cleanup?.();
+      game?.destroy();
     };
-  }, [start, onGameOver]);
+  }, [Game, onGameOver]);
   return <canvas ref={ref} style={styles.canvas} />;
 }

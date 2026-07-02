@@ -76,16 +76,18 @@ export function useLeaderboard(gameId: string) {
     setLoading(false);
   }
 
+  /** Returns true when the score was stored, false on error. */
   async function submitScore(username: string, score: number) {
     const { error } = await insertScore(gameId, username, score);
 
     if (error) {
       setError(error.message);
-      return;
+      return false;
     }
 
     localStorage.setItem(LEADERBOARD_USERNAME_KEY, username);
     await refresh();
+    return true;
   }
 
   return { scores, loading, error, submitScore, refresh };
