@@ -51,6 +51,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/setupTests.ts"],
+    // Node's built-in global localStorage (Node 22+) shadows jsdom's and
+    // leaves it non-functional in tests unless disabled at process start.
+    execArgv: ["--no-experimental-webstorage"],
   },
   resolve: {
     alias: {

@@ -6,6 +6,14 @@ const gameModules = import.meta.glob<Record<string, GameConstructor>>(
   "./*/index.ts",
 );
 
+describe("gameExportName", () => {
+  it("converts a kebab-case id into a PascalCase Game class name", () => {
+    expect(gameExportName("pong")).toBe("PongGame");
+    expect(gameExportName("space-invaders")).toBe("SpaceInvadersGame");
+    expect(gameExportName("a-b-c")).toBe("ABCGame");
+  });
+});
+
 describe("games registry", () => {
   it("has at least one game", () => {
     expect(games.length).toBeGreaterThan(0);

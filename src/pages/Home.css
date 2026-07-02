@@ -76,8 +76,7 @@
   display: block;
   flex: 0 0 auto;
   width: 128px;
-  /* Same 16:9 ratio at every breakpoint (only the width changes). */
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: var(--control-radius);
   border: 1px solid rgba(var(--pink-rgb), 0.2);
@@ -117,13 +116,5 @@
 @media (max-width: 600px) {
   .home {
     padding: 4vmin 4vmin calc(4vmin + 128px);
-  }
-
-  .game-card-link {
-    flex-direction: column;
-  }
-
-  .game-card-image {
-    width: 100%;
   }
 }

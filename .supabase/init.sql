@@ -14,11 +14,14 @@ as $$
   select id, game_id, username, score, created_at
   from (
     select *,
-      row_number() over (partition by username order by score desc) as rn
+      row_number() over (
+        partition by username
+        order by score desc, created_at asc
+      ) as rn
     from scores
     where game_id = p_game_id
   ) ranked
   where rn <= 3
-  order by score desc
+  order by score desc, created_at asc
   limit 30;
 $$;
