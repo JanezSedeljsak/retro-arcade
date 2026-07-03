@@ -46,7 +46,7 @@ export const games: GameMeta[] = [
   },
   {
     id: "whack-zogez",
-    title: "WhackZogez",
+    title: "Whack Zogez",
     description:
       "Whack Zogez as he pops out of his holes — score as many hits as you can in 60 seconds!",
   },
