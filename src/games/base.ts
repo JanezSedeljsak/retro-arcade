@@ -183,6 +183,15 @@ export abstract class BaseGame {
     this._k.quit();
   }
 
+  /**
+   * Return keyboard focus to the canvas. kaplay binds its key listeners to
+   * the canvas (not window), so it must hold DOM focus to receive them —
+   * an autofocused input elsewhere (e.g. the leaderboard modal) steals it.
+   */
+  focus(): void {
+    this.canvas.focus();
+  }
+
   /** Final score of the current run. Defaults to the accumulated score. */
   calculateScore(): number {
     return this.score;

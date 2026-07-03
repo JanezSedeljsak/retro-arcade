@@ -1,12 +1,212 @@
+import type {
+  ColorComp,
+  FixedComp,
+  GameObj,
+  PosComp,
+  RectComp,
+  TextComp,
+} from "kaplay";
 import { BaseGame, type GameOverHandler } from "@/games/base";
 
-// The tower grows upward — a square board reads better than 16:9.
+// Square board — fits phones and desktops alike.
 const BOARD_SIZE = 720;
+const BLOCK_H = 24;
+// Width of the base block and the first moving block — the seed the player
+// trims down from. Wide enough to give a forgiving first few drops.
+const START_W = 400;
+
+// Horizontal travel speed, in px/sec. Scales up with each successful drop
+// so the run gets steadily harder.
+const SPEED = 300;
+const SPEED_INCREMENT = 15;
+
+// Color palette — the hue cycles through the stack so every block reads
+// as a distinct band. Kept in the 0..255 RGB range kaplay expects.
+const BG_COLOR = [20, 18, 40] as const;
+const SCORE_COLOR = [255, 120, 220] as const;
+const GAME_OVER_COLOR = [255, 80, 120] as const;
+const RESTART_COLOR = [255, 120, 220] as const;
+const HUE_STEP = 15;
+const HUE_BASE_R = 180;
+const HUE_BASE_B = 255;
+const HUE_B_AMPLITUDE = 120;
+
+const SCORE_TEXT_SIZE = 32;
+const GAME_OVER_TEXT_SIZE = 56;
+const RESTART_TEXT_SIZE = 28;
+
+// Camera: the topmost block is held at this fraction down the viewport, so
+// the locked stack fills the lower ~70% as it climbs and the run can keep
+// going far past the board's fixed height. The camera only pans up from the
+// default center — never back down mid-run — and resets on restart.
+const TOWER_TOP_SCREEN_FRACTION = 0.3;
+const DEFAULT_CAM_X = BOARD_SIZE / 2;
+const DEFAULT_CAM_Y = BOARD_SIZE / 2;
+
+type BlockObj = GameObj<RectComp | PosComp | ColorComp>;
+type TextObj = GameObj<TextComp | PosComp | ColorComp | FixedComp>;
+
+type Block = {
+  x: number;
+  y: number;
+  w: number;
+  obj: BlockObj;
+};
 
 export class StacktowerGame extends BaseGame {
+  readonly controls = { joystick: false, press: true };
+
+  private blocks: Block[] = [];
+  private current!: Block;
+  private dir = 1;
+  private speed = SPEED;
+  private scoreText!: TextObj;
+
   constructor(canvas: HTMLCanvasElement, onGameOver?: GameOverHandler) {
     super(canvas, onGameOver, { width: BOARD_SIZE, height: BOARD_SIZE });
+    this.resetGame();
   }
 
-  protected update() {}
+  restart(): void {
+    super.restart();
+    this._k.destroyAll("scene");
+    this.resetGame();
+  }
+
+  protected update(): void {
+    const step = this.dir * this.speed * this._k.dt();
+    this.current.x += step;
+
+    // Bounce off the side walls so the block stays on the board.
+    if (this.current.x < 0) {
+      this.current.x = 0;
+      this.dir = 1;
+    } else if (this.current.x + this.current.w > BOARD_SIZE) {
+      this.current.x = BOARD_SIZE - this.current.w;
+      this.dir = -1;
+    }
+
+    this.current.obj.pos.x = this.current.x;
+
+    // Pan the camera up so the topmost block stays at TOWER_TOP_SCREEN_FRACTION
+    // of the viewport. min() keeps the default framing while the tower is short
+    // and only pans once the top would otherwise cross that line.
+    const targetCamY =
+      this.current.y + (0.5 - TOWER_TOP_SCREEN_FRACTION) * BOARD_SIZE;
+    this._k.setCamPos(DEFAULT_CAM_X, Math.min(DEFAULT_CAM_Y, targetCamY));
+  }
+
+  protected press(): void {
+    const last = this.blocks[this.blocks.length - 1];
+    const curr = this.current;
+
+    const left = Math.max(last.x, curr.x);
+    const right = Math.min(last.x + last.w, curr.x + curr.w);
+    const width = right - left;
+
+    // No overlap with the block below — the tower topples.
+    if (width <= 0) {
+      this.endGame();
+      this.showGameOver();
+      return;
+    }
+
+    // Trim the dropped block down to the overlapping slice.
+    curr.w = width;
+    curr.x = left;
+    curr.obj.width = width;
+    curr.obj.pos.x = left;
+
+    this.blocks.push(curr);
+
+    this.score++;
+    this.scoreText.text = String(this.score);
+
+    this.speed += SPEED_INCREMENT;
+
+    // Next block spawns one level higher and may approach from either side.
+    const nextY = BOARD_SIZE - BLOCK_H * (this.blocks.length + 1);
+    this.current = this.createBlock(0, nextY, width);
+    this.dir = this._k.choose([-1, 1]);
+  }
+
+  private resetGame(): void {
+    // Everything we add gets this tag so restart() can wipe it all at once.
+    const SCENE_TAG = "scene";
+    this.blocks = [];
+    this.dir = 1;
+    this.speed = SPEED;
+    this.score = 0;
+
+    // Camera pans upward as the tower climbs; reset it to the board center.
+    this._k.setCamPos(DEFAULT_CAM_X, DEFAULT_CAM_Y);
+
+    // fixed() keeps the background pinned to the viewport instead of world
+    // space, so it always fills the screen no matter how high we pan.
+    this._k.add([
+      this._k.rect(BOARD_SIZE, BOARD_SIZE),
+      this._k.pos(0, 0),
+      this._k.color(...BG_COLOR),
+      this._k.fixed(),
+      SCENE_TAG,
+    ]);
+
+    // Score stays in the top-left corner of the screen, not the world.
+    this.scoreText = this._k.add([
+      this._k.text("0", { size: SCORE_TEXT_SIZE }),
+      this._k.pos(20, 20),
+      this._k.color(...SCORE_COLOR),
+      this._k.fixed(),
+      SCENE_TAG,
+    ]);
+
+    const base = this.createBlock(
+      BOARD_SIZE / 2 - START_W / 2,
+      BOARD_SIZE - BLOCK_H,
+      START_W,
+    );
+    this.blocks.push(base);
+
+    this.current = this.createBlock(0, BOARD_SIZE - BLOCK_H * 2, START_W);
+  }
+
+  private createBlock(x: number, y: number, w: number): Block {
+    // Hue shifts per stack height so each band is visually distinct.
+    const hueShift = this.blocks.length * HUE_STEP;
+    const obj = this._k.add([
+      this._k.rect(w, BLOCK_H),
+      this._k.pos(x, y),
+      this._k.color(
+        (HUE_BASE_R + hueShift) % 255,
+        120,
+        HUE_BASE_B - (hueShift % HUE_B_AMPLITUDE),
+      ),
+      // Block objects are tagged so they survive restart alongside the rest.
+      "scene",
+    ]);
+
+    return { x, y, w, obj };
+  }
+
+  // Runs after endGame() so the score is reported before we freeze the run.
+  private showGameOver(): void {
+    // fixed() so the overlay centers on the viewport, not the (panned) world.
+    this._k.add([
+      this._k.text("GAME OVER", { size: GAME_OVER_TEXT_SIZE }),
+      this._k.pos(BOARD_SIZE / 2, BOARD_SIZE / 2 - GAME_OVER_TEXT_SIZE),
+      this._k.anchor("center"),
+      this._k.color(...GAME_OVER_COLOR),
+      this._k.fixed(),
+      "scene",
+    ]);
+
+    this._k.add([
+      this._k.text("Press R to restart", { size: RESTART_TEXT_SIZE }),
+      this._k.pos(BOARD_SIZE / 2, BOARD_SIZE / 2 + RESTART_TEXT_SIZE),
+      this._k.anchor("center"),
+      this._k.color(...RESTART_COLOR),
+      this._k.fixed(),
+      "scene",
+    ]);
+  }
 }

@@ -1,5 +1,12 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { lazy, useMemo, useState, useCallback, Suspense } from "react";
+import {
+  lazy,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  Suspense,
+} from "react";
 import { games, gameExportName } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
 import { TouchJoystick } from "@/components/TouchJoystick";
@@ -84,6 +91,29 @@ export function GamePage() {
     setGame(g);
   }, []);
 
+  // kaplay's key handler is bound to the canvas, which the leaderboard modal's
+  // autofocus input steals focus from. While the modal is open, listen for "r"
+  // at the window level so the run can be restarted without first clicking the
+  // canvas. Closes the modal and hands focus back so the canvas handler takes
+  // over again for subsequent restarts.
+  useEffect(() => {
+    if (finalScore === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "r" && e.key !== "R") return;
+      e.preventDefault();
+      game?.restart();
+      game?.focus();
+      setFinalScore(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [finalScore, game]);
+
+  const closeLeaderboard = useCallback(() => {
+    setFinalScore(null);
+    game?.focus();
+  }, [game]);
+
   if (!gameId) return <Navigate to="/" replace />;
 
   const showJoystick =
@@ -115,7 +145,7 @@ export function GamePage() {
             gameId={gameId}
             title={meta?.title ?? gameId}
             score={finalScore}
-            onClose={() => setFinalScore(null)}
+            onClose={closeLeaderboard}
           />
         </Suspense>
       )}
