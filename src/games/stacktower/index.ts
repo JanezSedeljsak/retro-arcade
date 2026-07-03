@@ -1,11 +1,15 @@
 import type {
+  AnchorComp,
   ColorComp,
   FixedComp,
   GameObj,
   PosComp,
   RectComp,
+  RotateComp,
+  SpriteComp,
   TextComp,
 } from "kaplay";
+import characterSprite from "@/assets/character.webp";
 import { BaseGame, type GameOverHandler } from "@/games/base";
 
 // Square board — fits phones and desktops alike.
@@ -43,8 +47,21 @@ const TOWER_TOP_SCREEN_FRACTION = 0.3;
 const DEFAULT_CAM_X = BOARD_SIZE / 2;
 const DEFAULT_CAM_Y = BOARD_SIZE / 2;
 
+// Corner mascot: rendered at ~25% of the board height so it reads clearly
+// in the corner, and rotates to face the top block's center.
+const CHAR_SIZE = 0.25 * BOARD_SIZE;
+const CHAR_MARGIN = 16;
+// Constant clockwise offset added to the look-at angle, in degrees. The
+// sprite art's "front" isn't aligned to +x, so this corrects the facing.
+const CHAR_ROTATION_OFFSET = 100;
+
 type BlockObj = GameObj<RectComp | PosComp | ColorComp>;
 type TextObj = GameObj<TextComp | PosComp | ColorComp | FixedComp>;
+// Fixed + rotate so it stays pinned to the viewport while spinning to face
+// the (camera-transformed) top block.
+type CharObj = GameObj<
+  SpriteComp | PosComp | AnchorComp | FixedComp | RotateComp
+>;
 
 type Block = {
   x: number;
@@ -61,9 +78,11 @@ export class StacktowerGame extends BaseGame {
   private dir = 1;
   private speed = SPEED;
   private scoreText!: TextObj;
+  private char!: CharObj;
 
   constructor(canvas: HTMLCanvasElement, onGameOver?: GameOverHandler) {
     super(canvas, onGameOver, { width: BOARD_SIZE, height: BOARD_SIZE });
+    this._k.loadSprite("character", characterSprite);
     this.resetGame();
   }
 
@@ -94,6 +113,21 @@ export class StacktowerGame extends BaseGame {
     const targetCamY =
       this.current.y + (0.5 - TOWER_TOP_SCREEN_FRACTION) * BOARD_SIZE;
     this._k.setCamPos(DEFAULT_CAM_X, Math.min(DEFAULT_CAM_Y, targetCamY));
+
+    // The mascot is screen-space (fixed), the block is world-space, so convert
+    // the block center through toScreen() before measuring the angle.
+    const targetWorld = this._k.vec2(
+      this.current.x + this.current.w / 2,
+      this.current.y + BLOCK_H / 2,
+    );
+    const targetScreen = this._k.toScreen(targetWorld);
+    const dx = targetScreen.x - this.char.pos.x;
+    const dy = targetScreen.y - this.char.pos.y;
+    // atan2 → degrees; assumes the sprite art faces right (0° = +x). Adding
+    // CHAR_ROTATION_OFFSET spins it clockwise to match the sprite's actual
+    // facing (positive angle = clockwise because screen y points down).
+    this.char.angle =
+      (Math.atan2(dy, dx) * 180) / Math.PI + CHAR_ROTATION_OFFSET;
   }
 
   protected press(): void {
@@ -126,8 +160,14 @@ export class StacktowerGame extends BaseGame {
 
     // Next block spawns one level higher and may approach from either side.
     const nextY = BOARD_SIZE - BLOCK_H * (this.blocks.length + 1);
-    this.current = this.createBlock(0, nextY, width);
-    this.dir = this._k.choose([-1, 1]);
+    // Alternate sides per drop: score is even → next block enters from the
+    // left moving right; odd → from the right moving left. The initial block
+    // (score 0 before any drop) is spawned at the left in resetGame(), so
+    // this keeps the alternation in sync with what the player just saw.
+    const fromLeft = this.score % 2 === 0;
+    const nextX = fromLeft ? 0 : BOARD_SIZE - width;
+    this.current = this.createBlock(nextX, nextY, width);
+    this.dir = fromLeft ? 1 : -1;
   }
 
   private resetGame(): void {
@@ -156,6 +196,21 @@ export class StacktowerGame extends BaseGame {
       this._k.text("0", { size: SCORE_TEXT_SIZE }),
       this._k.pos(20, 20),
       this._k.color(...SCORE_COLOR),
+      this._k.fixed(),
+      SCENE_TAG,
+    ]);
+
+    // Mascot pinned to the top-right corner of the viewport. fixed() keeps it
+    // there as the camera pans up with the tower; anchor("center") makes the
+    // rotate() angle spin around the sprite's middle.
+    this.char = this._k.add([
+      this._k.sprite("character", { height: CHAR_SIZE }),
+      this._k.pos(
+        BOARD_SIZE - CHAR_MARGIN - CHAR_SIZE / 2,
+        CHAR_MARGIN + CHAR_SIZE / 2,
+      ),
+      this._k.anchor("center"),
+      this._k.rotate(0),
       this._k.fixed(),
       SCENE_TAG,
     ]);
