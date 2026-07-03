@@ -53,13 +53,17 @@ const PIPE_CAP_HEIGHT = BOARD_HEIGHT * 0.035;
 const PIPE_SHAFT_COLOR = [124, 58, 237] as const;
 const PIPE_CAP_COLOR = [168, 85, 247] as const;
 
-const PIPE_GAP = BOARD_HEIGHT * 0.21;
+const PIPE_GAP = BOARD_HEIGHT * 0.19;
 const PIPE_SPACING = BOARD_WIDTH * 0.62;
 const PIPE_SPEED = BOARD_WIDTH * 0.42;
 // Gap center is randomized within this range, leaving room for the cap and
 // a margin above the ceiling / above the ground.
 const GAP_Y_MIN = PIPE_GAP / 2 + BOARD_HEIGHT * 0.08;
 const GAP_Y_MAX = GROUND_Y - PIPE_GAP / 2 - BOARD_HEIGHT * 0.05;
+// Consecutive gaps can't be more than this far apart vertically — pipes are
+// ~1.5s apart at scroll speed, and a ceiling-to-floor jump between gaps
+// isn't reachable with a fair tap cadence in that time.
+const MAX_GAP_Y_STEP = BOARD_HEIGHT * 0.22;
 // First pipe spawns further out than the steady-state spacing so the player
 // gets a beat to get their bearings before it arrives.
 const FIRST_PIPE_X = BOARD_WIDTH * 1.3;
@@ -92,6 +96,7 @@ export class FlappyZogezGame extends BaseGame {
   private bird: Bird;
   private hud: Hud;
   private pipes: PipePair[] = [];
+  private lastGapY: number | null = null;
   private spawnTimer = FIRST_SPAWN_DELAY;
   private started = false;
 
@@ -142,6 +147,7 @@ export class FlappyZogezGame extends BaseGame {
     super.restart();
     this._k.destroyAll("pipe");
     this.pipes = [];
+    this.lastGapY = null;
     this.started = false;
     this.spawnTimer = FIRST_SPAWN_DELAY;
     this.bird.pos.x = BIRD_X;
@@ -246,7 +252,14 @@ export class FlappyZogezGame extends BaseGame {
 
   private spawnPipe(x: number) {
     const k = this._k;
-    const gapY = k.rand(GAP_Y_MIN, GAP_Y_MAX);
+    const gapY =
+      this.lastGapY === null
+        ? k.rand(GAP_Y_MIN, GAP_Y_MAX)
+        : k.rand(
+            Math.max(GAP_Y_MIN, this.lastGapY - MAX_GAP_Y_STEP),
+            Math.min(GAP_Y_MAX, this.lastGapY + MAX_GAP_Y_STEP),
+          );
+    this.lastGapY = gapY;
     const gapTop = gapY - PIPE_GAP / 2;
     const gapBottom = gapY + PIPE_GAP / 2;
 
