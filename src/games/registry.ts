@@ -50,4 +50,10 @@ export const games: GameMeta[] = [
     description:
       "Whack Zogez as he pops out of his holes — score as many hits as you can in 60 seconds!",
   },
+  {
+    id: "flappy-zogez",
+    title: "Flappy Zogez",
+    description:
+      "Tap or press Space to flap Zogez through the purple pipes without crashing.",
+  },
 ];

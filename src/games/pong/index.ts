@@ -218,6 +218,8 @@ export class PongGame extends BaseGame {
 
   private serveBall(direction: number) {
     const k = this._k;
+    this.player.pos.y = GAME_HEIGHT / 2;
+    this.bot.pos.y = GAME_HEIGHT / 2;
     this.ball.pos.x = GAME_WIDTH / 2;
     this.ball.pos.y = GAME_HEIGHT / 2;
     const angle = k.rand(-SERVE_ANGLE, SERVE_ANGLE);

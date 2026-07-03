@@ -99,6 +99,15 @@ export abstract class BaseGame {
       canvas,
       width: this.width,
       height: this.height,
+      // The canvas is displayed at a CSS size that varies with the screen
+      // (applyCanvasSizing below). Without these, kaplay assumes the canvas
+      // is shown at exactly width×height CSS px and maps pointer events 1:1
+      // from CSS px to world units — so on any other display size clicks
+      // land offset (or, on smaller screens, can't reach the far edge at
+      // all). stretch+letterbox make kaplay track the element's real size
+      // via its ResizeObserver and scale input through the viewport.
+      stretch: true,
+      letterbox: true,
       global: false,
       background: BOARD_BACKGROUND,
       font: fontName,
@@ -108,6 +117,13 @@ export abstract class BaseGame {
 
     // kaplay overwrites canvas.style on init, so apply our sizing after —
     // and again whenever the device flips between portrait and landscape.
+    // In stretch/letterbox mode kaplay keeps rewriting the canvas's
+    // width/height *attributes* to whatever the element was last laid out
+    // at, so the attributes no longer encode the board ratio and the
+    // `auto` axis in applyCanvasSizing would resolve against a stale size.
+    // Pinning aspect-ratio keeps the element at the board's shape, which
+    // also keeps kaplay's letterbox bars at zero.
+    canvas.style.aspectRatio = `${this.width} / ${this.height}`;
     this.applyCanvasSizing();
     this.portraitQuery.addEventListener("change", this.applyCanvasSizing);
     canvas.style.border = "min(0.6vmin, 4px) solid rgba(255, 120, 220, 0.6)";

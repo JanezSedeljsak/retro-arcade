@@ -5,6 +5,7 @@ import type {
   GameObj,
   OpacityComp,
   PosComp,
+  RectComp,
   ScaleComp,
   SpriteComp,
   TextComp,
@@ -66,7 +67,7 @@ const GAP_MS: [number, number] = [150, 400];
 
 type Hole = GameObj<PosComp>;
 type Zogez = GameObj<SpriteComp | PosComp | AnchorComp | ScaleComp>;
-type Hitbox = GameObj<PosComp | AreaComp>;
+type Hitbox = GameObj<PosComp | AreaComp | AnchorComp | RectComp>;
 type Hud = GameObj<TextComp | PosComp | AnchorComp | ColorComp | OpacityComp>;
 
 export class WhackZogezGame extends BaseGame {
@@ -118,20 +119,15 @@ export class WhackZogezGame extends BaseGame {
       k.z(2),
     ]);
 
-    // Invisible, fixed-size click target — kept separate from `zogez` above
-    // so the hitbox doesn't shrink along with his pop-in/pop-out animation.
-    // The shape is centered on `pos` (top-left offset by -radius on each axis)
-    // rather than relying on an anchor, since it has no sprite/rect to anchor.
+    // Fixed-size click target — kept separate from `zogez` above so the
+    // hitbox doesn't shrink along with his pop-in/pop-out animation. The
+    // rect() draws nothing (no fill, no outline); it exists so area(),
+    // which is given no shape of its own, derives the collider from it.
     this.hitbox = k.add([
       k.pos(GRID_LEFT, GRID_TOP),
-      k.area({
-        shape: new k.Rect(
-          k.vec2(-HITBOX_HALF_WIDTH, -HITBOX_HALF_HEIGHT),
-          HITBOX_HALF_WIDTH * 2,
-          HITBOX_HALF_HEIGHT * 2,
-        ),
-        cursor: "pointer",
-      }),
+      k.anchor("center"),
+      k.rect(HITBOX_HALF_WIDTH * 2, HITBOX_HALF_HEIGHT * 2, { fill: false }),
+      k.area({ cursor: "pointer" }),
       k.z(2),
     ]);
     this.hitbox.onClick(() => this.handleHit());

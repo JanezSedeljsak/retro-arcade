@@ -129,7 +129,10 @@ export function GamePage() {
         <button
           type="button"
           className="game-reset-btn"
-          onClick={() => game?.restart()}
+          onClick={() => {
+            game?.restart();
+            game?.focus();
+          }}
           disabled={game === null}
         >
           Reset
