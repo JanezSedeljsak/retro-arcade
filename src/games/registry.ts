@@ -44,4 +44,10 @@ export const games: GameMeta[] = [
     title: "Stack Tower",
     description: "Build the tallest tower by stacking blocks without toppling.",
   },
+  {
+    id: "whack-zogez",
+    title: "WhackZogez",
+    description:
+      "Whack Zogez as he pops out of his holes — score as many hits as you can in 60 seconds!",
+  },
 ];

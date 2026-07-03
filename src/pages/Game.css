@@ -31,6 +31,38 @@
   margin: 0;
   font-size: 2rem;
   color: var(--fg);
+  flex: 1;
+}
+
+.game-reset-btn {
+  font-family: inherit;
+  font-size: 1.4rem;
+  color: var(--pink);
+  background: transparent;
+  border: 2px solid rgba(var(--pink-rgb), 0.4);
+  border-radius: 6px;
+  padding: 2px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.game-reset-btn:hover:not(:disabled) {
+  border-color: var(--pink);
+}
+
+.game-reset-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* On small screens the tap targets for Back/Reset get bumped up so
+   they're easier to hit with a thumb. */
+@media (max-width: 600px) {
+  .game-back-link,
+  .game-reset-btn {
+    font-size: 1.8rem;
+    padding: 4px 18px;
+  }
 }
 
 .game-viewport {
