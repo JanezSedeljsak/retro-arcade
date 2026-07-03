@@ -18,6 +18,10 @@ const BLOCK_H = 24;
 // Width of the base block and the first moving block — the seed the player
 // trims down from. Wide enough to give a forgiving first few drops.
 const START_W = 400;
+// Floor for the trimmed block width, in world px. Without it a long run
+// shrinks the block into a sub-pixel sliver that's invisible on screen but
+// still in play.
+const MIN_BLOCK_W = 3;
 
 // Horizontal travel speed, in px/sec. Scales up with each successful drop
 // so the run gets steadily harder.
@@ -145,10 +149,11 @@ export class StacktowerGame extends BaseGame {
       return;
     }
 
-    // Trim the dropped block down to the overlapping slice.
-    curr.w = width;
+    // Trim the dropped block down to the overlapping slice, but never below
+    // MIN_BLOCK_W so the tower stays visible.
+    curr.w = Math.max(width, MIN_BLOCK_W);
     curr.x = left;
-    curr.obj.width = width;
+    curr.obj.width = curr.w;
     curr.obj.pos.x = left;
 
     this.blocks.push(curr);
@@ -165,8 +170,8 @@ export class StacktowerGame extends BaseGame {
     // (score 0 before any drop) is spawned at the left in resetGame(), so
     // this keeps the alternation in sync with what the player just saw.
     const fromLeft = this.score % 2 === 0;
-    const nextX = fromLeft ? 0 : BOARD_SIZE - width;
-    this.current = this.createBlock(nextX, nextY, width);
+    const nextX = fromLeft ? 0 : BOARD_SIZE - curr.w;
+    this.current = this.createBlock(nextX, nextY, curr.w);
     this.dir = fromLeft ? 1 : -1;
   }
 
