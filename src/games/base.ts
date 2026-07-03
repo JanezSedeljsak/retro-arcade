@@ -23,8 +23,6 @@ export const GAME_HEIGHT = 720;
 // Joystick tilt below this fraction of full travel counts as centered.
 const JOYSTICK_DEADZONE = 0.35;
 
-// Board background: dark purple in the same family as the app theme
-// (#1d1d40 / #14142c in index.css).
 const BOARD_BACKGROUND: [number, number, number, number] = [0, 0, 0, 0];
 
 /**

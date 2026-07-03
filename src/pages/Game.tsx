@@ -126,6 +126,14 @@ export function GamePage() {
           ← Back
         </Link>
         <h2 className="game-title">{meta?.title ?? gameId}</h2>
+        <button
+          type="button"
+          className="game-reset-btn"
+          onClick={() => game?.restart()}
+          disabled={game === null}
+        >
+          Reset
+        </button>
       </div>
       <div className="game-viewport">
         <LazyGame
