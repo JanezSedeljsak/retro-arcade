@@ -73,8 +73,6 @@ export class SpaceInvadersGame extends BaseGame {
   private aliens: Alien[] = [];
   private bullets: Bullet[] = [];
   private dir = 1;
-  private bulletsShot = 0;
-  private bonusTime = 0;
   /** performance.now() ms of recent shots, pruned to the rolling window. */
   private shotTimes: number[] = [];
   /** Only a full clear counts as a win — anything else scores 0. */
@@ -132,11 +130,7 @@ export class SpaceInvadersGame extends BaseGame {
   }
 
   private hudText() {
-    const timeLeft = Math.max(
-      0,
-      Math.ceil(this.roundTime + this.bonusTime - this.elapsed),
-    );
-    return `AMMO ${this.ammoLeft()}/${MAX_SHOTS_PER_WINDOW}  TIME ${timeLeft}`;
+    return `AMMO ${this.ammoLeft()}/${MAX_SHOTS_PER_WINDOW}  TIME ${Math.floor(this.elapsed)}`;
   }
 
   // =====================
@@ -156,11 +150,6 @@ export class SpaceInvadersGame extends BaseGame {
     this.shotTimes.push(performance.now());
 
     const k = this._k;
-    this.bulletsShot++;
-
-    if (this.bulletsShot % 5 === 0) {
-      this.bonusTime += 2;
-    }
 
     const bullet: Bullet = k.add([
       k.rect(BULLET_W, BULLET_H),
@@ -277,9 +266,8 @@ export class SpaceInvadersGame extends BaseGame {
 
   private updateTimer() {
     this.elapsed = (performance.now() - this.startTime) / 1000;
-    const maxTime = this.roundTime + this.bonusTime;
 
-    if (this.elapsed >= maxTime) {
+    if (this.elapsed >= this.roundTime) {
       this.endGame();
     }
   }
@@ -322,7 +310,7 @@ export class SpaceInvadersGame extends BaseGame {
     // Faster clears score higher. Bonus time is excluded so firing extra
     // shots can't buy score; winning in overtime still beats any loss.
     const elapsedSeconds = (performance.now() - this.startTime) / 1000;
-    return Math.max(1, Math.round(this.roundTime - elapsedSeconds));
+    return Math.max(-100, -Math.round(elapsedSeconds));
   }
 
   override restart(): void {
@@ -336,8 +324,6 @@ export class SpaceInvadersGame extends BaseGame {
     this.aliens = [];
     this.bullets = [];
     this.dir = 1;
-    this.bulletsShot = 0;
-    this.bonusTime = 0;
     this.shotTimes = [];
     this.won = false;
     this.dropCooldown = ALIEN_DROP_COOLDOWN;

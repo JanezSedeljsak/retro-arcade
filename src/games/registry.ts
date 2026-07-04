@@ -32,6 +32,7 @@ export const games: GameMeta[] = [
     id: "space-invaders",
     title: "Space Invaders",
     description: "Clear every alien before they land.",
+    isTimeBased: true,
   },
   {
     id: "whirlybird",
