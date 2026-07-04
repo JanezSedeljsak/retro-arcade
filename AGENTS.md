@@ -134,6 +134,13 @@ To add a game: create `src/games/<id>/index.ts` exporting the
   `src/lib/utils.ts`, and the games' `clamp()` in `src/games/base.ts`. Add
   to these when something is genuinely reusable — don't fork a new inline
   copy of an icon or a `Math.max(min, Math.min(max, v))` clamp.
+- **Fonts:** the site font stack (`VT323` body / `Amused` headings, set
+  globally in `index.css`) does not reach form controls — browsers give
+  `button`/`input`/`select`/`textarea` their own UI font by default. Any
+  rule for one of these elements (or a class applied to one, e.g.
+  `.default-btn`, `.game-card-btn`) must set `font-family: inherit;`
+  explicitly. Don't introduce a button or input that silently falls back
+  to the system font.
 - **Styling:** inline `const styles: { ... } = { ... }` of `CSSProperties`
   for simple cases — no hover/focus, animations, or media queries, under
   ~30 lines (see `GameCanvas.tsx`). Otherwise a colocated `.css` file (see
