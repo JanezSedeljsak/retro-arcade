@@ -3,6 +3,12 @@
 .retro-layout {
   width: 100vw;
   height: 100vh;
+  /* dvh tracks the *visible* viewport, shrinking when the mobile browser's
+     address/toolbar chrome is on screen — plain vh assumes it's hidden,
+     leaving a dead gap below the content in a regular browser tab (fine in
+     standalone/home-screen mode, which has no such chrome). Kept the vh
+     line above as a fallback for browsers without dvh support. */
+  height: 100dvh;
   display: grid;
   grid-template-rows: 1fr;
   background: radial-gradient(

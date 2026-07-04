@@ -20,7 +20,7 @@ as $$
   from (
     select *,
       row_number() over (
-        partition by username
+        partition by lower(username)
         order by score desc, created_at asc
       ) as rn
     from scores
