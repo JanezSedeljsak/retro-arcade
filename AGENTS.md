@@ -48,6 +48,7 @@ public/
 scripts/
   make_banners.sh           # converts src/games/*/*.png to */banner.webp (q80), deletes the PNG
   png-to-webp.sh            # same conversion for src/assets/*.png
+  game_stats.sh             # prints each game's index.ts line count, longest first
 ```
 
 ## Games

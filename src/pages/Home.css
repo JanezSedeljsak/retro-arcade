@@ -189,8 +189,8 @@
 }
 
 @media (max-width: 600px) {
-  .home {
-    padding: 4vmin 4vmin calc(4vmin + 128px);
+  .home h1 {
+    font-size: clamp(2.5rem, 9.5vmin, 3.5rem);
   }
   .game-card-header {
     flex-direction: row;
