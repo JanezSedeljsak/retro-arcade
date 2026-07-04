@@ -5,9 +5,10 @@ Guidelines for AI agents (and humans) contributing to this repository.
 ## What this app is
 
 Retro Arcade: a web + mobile (PWA) platform for playing retro mini games
-(Pong, Space Invaders, Whirlybird, Stack Tower) in the browser, with a
-Supabase-backed leaderboard per game. Games run on an HTML5 `<canvas>` via
-the `kaplay` engine; React + React Router provide the shell around it.
+(Pong, Space Invaders, Whirlybird, Stack Tower, Whack Zogez, Flappy Zogez) in
+the browser, with a Supabase-backed leaderboard per game. Games run on an
+HTML5 `<canvas>` via the `kaplay` engine; React + React Router provide the
+shell around it.
 
 ## Commands
 
@@ -25,6 +26,7 @@ src/
   assets/                   # bundled images, imported via @/assets/...
   lib/
     supabase.ts             # getSupabase() — lazy singleton Supabase client
+    utils.ts                # generic helpers with no other natural home (getErrorMessage, formatDateTime)
   hooks/
     useLeaderboard.ts       # scores fetch/submit for a gameId + stored username
   components/
@@ -32,15 +34,20 @@ src/
     GameCanvas.tsx          # canvas host, instantiates a game class on <canvas>
     TouchJoystick.tsx       # drag joystick for touch devices (GamePage renders it)
     LeaderboardModal.tsx    # score list + submit form (lazy-loaded)
+    Icons.tsx               # shared inline-SVG icons (PlayIcon, TrophyIcon, CloseIcon, …)
   pages/
     Home.tsx                # game grid + leaderboard entry points
     Game.tsx                # resolves :gameId, lazy-loads game via import.meta.glob
   games/
     registry.ts             # GameMeta list — single source of truth for Home
-    base.ts                 # BaseGame — lifecycle/score contract for all games
+    base.ts                 # BaseGame — lifecycle/score contract for all games; also exports clamp()
     <game-id>/index.ts      # the kaplay game, exports its <PascalCaseId>Game class
+    <game-id>/banner.webp   # Home game-card art; picked up by import.meta.glob
 public/
   fonts/, images/           # static assets, referenced with import.meta.env.BASE_URL
+scripts/
+  make_banners.sh           # converts src/games/*/*.png to */banner.webp (q80), deletes the PNG
+  png-to-webp.sh            # same conversion for src/assets/*.png
 ```
 
 ## Games
@@ -103,7 +110,7 @@ To add a game: create `src/games/<id>/index.ts` exporting the
 
 - Client: `getSupabase()` from `@/lib/supabase` — never create another client.
   Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env`
-  (gitignored, not in the repo).
+  (gitignored, not in the repo — see `.env.example` for the required keys).
 - Data: one `scores` table — `id, game_id, username, score, created_at`.
   `useLeaderboard(gameId)` fetches top 30 by score and handles submits;
   the username persists in localStorage (`retro-arcade:username`).
@@ -122,6 +129,11 @@ To add a game: create `src/games/<id>/index.ts` exporting the
   slow, raise it with the user instead of memoizing.
 - **Keep it simple.** Small functional components, no speculative
   abstractions or configuration, no half-finished features.
+- **Reuse shared modules** instead of redeclaring: icons live in
+  `src/components/Icons.tsx`, generic non-domain helpers in
+  `src/lib/utils.ts`, and the games' `clamp()` in `src/games/base.ts`. Add
+  to these when something is genuinely reusable — don't fork a new inline
+  copy of an icon or a `Math.max(min, Math.min(max, v))` clamp.
 - **Styling:** inline `const styles: { ... } = { ... }` of `CSSProperties`
   for simple cases — no hover/focus, animations, or media queries, under
   ~30 lines (see `GameCanvas.tsx`). Otherwise a colocated `.css` file (see

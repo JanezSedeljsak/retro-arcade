@@ -7,6 +7,10 @@
   justify-content: center;
   padding: 4vmin;
   background: rgba(8, 8, 18, 0.75);
+  /* Opts back into selection when opened from the game page, whose
+     .game-panel disables it for gameplay taps. */
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* Extends .retro-panel: adds the outer glow to the shared inset shadow. */
@@ -44,13 +48,17 @@
 }
 
 .leaderboard-close {
+  display: flex;
   background: transparent;
   border: none;
   color: var(--fg);
-  font-size: 1.6rem;
-  line-height: 1;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 4px;
+}
+
+.leaderboard-close .icon {
+  width: 22px;
+  height: 22px;
 }
 
 .leaderboard-close:hover {

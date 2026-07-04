@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/utils";
 
 type Score = {
   id: number;
@@ -30,7 +31,7 @@ async function fetchScores(gameId: string) {
   } catch (e) {
     return {
       data: null,
-      error: { message: (e as Error).message },
+      error: { message: getErrorMessage(e) },
     };
   }
 }
@@ -41,7 +42,7 @@ async function insertScore(gameId: string, username: string, score: number) {
       .from("scores")
       .insert({ game_id: gameId, username, score });
   } catch (e) {
-    return { error: { message: (e as Error).message } };
+    return { error: { message: getErrorMessage(e) } };
   }
 }
 

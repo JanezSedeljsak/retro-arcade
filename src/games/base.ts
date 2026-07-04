@@ -20,6 +20,11 @@ export type GameOptions = {
 export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
+/** Restricts a value to [min, max] — used to keep players/spawns on-board. */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 // Joystick tilt below this fraction of full travel counts as centered.
 const JOYSTICK_DEADZONE = 0.35;
 

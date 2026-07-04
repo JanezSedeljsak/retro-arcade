@@ -1,11 +1,13 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import {
+  Component,
   lazy,
   useEffect,
   useMemo,
   useState,
   useCallback,
   Suspense,
+  type ReactNode,
 } from "react";
 import { games, gameExportName } from "@/games/registry";
 import { GameCanvas } from "@/components/GameCanvas";
@@ -27,6 +29,41 @@ const LeaderboardModal = lazy(() =>
     default: m.LeaderboardModal,
   })),
 );
+
+/**
+ * Catches a failed dynamic import (e.g. a flaky mobile connection dropping
+ * the game chunk) so the page shows a retry message instead of a blank
+ * crash — React error boundaries have no hook equivalent, hence the class.
+ */
+class GameLoadBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <p className="game-loading">
+          Couldn't load this game — check your connection and{" "}
+          <button
+            type="button"
+            className="game-reload-btn"
+            onClick={() => window.location.reload()}
+          >
+            reload
+          </button>
+          .
+        </p>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function resolveLoader(gameId: string) {
   const key = `../games/${gameId}/index.ts`;
@@ -71,9 +108,11 @@ function LazyGame({
   if (!GameModule) return <Navigate to="/" replace />;
 
   return (
-    <Suspense fallback={<p className="game-loading">Loading game…</p>}>
-      <GameModule />
-    </Suspense>
+    <GameLoadBoundary>
+      <Suspense fallback={<p className="game-loading">Loading game…</p>}>
+        <GameModule />
+      </Suspense>
+    </GameLoadBoundary>
   );
 }
 
@@ -123,7 +162,7 @@ export function GamePage() {
     <div className="game-panel">
       <div className="game-header">
         <Link to="/" className="game-back-link">
-          ← Back
+          Back
         </Link>
         <h2 className="game-title">{meta?.title ?? gameId}</h2>
         <button

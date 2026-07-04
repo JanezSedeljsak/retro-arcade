@@ -17,6 +17,7 @@ import {
   BaseGame,
   GAME_WIDTH,
   GAME_HEIGHT,
+  clamp,
   type GameControls,
   type GameOverHandler,
 } from "@/games/base";
@@ -169,9 +170,10 @@ export class PongGame extends BaseGame {
       const step = Math.min(Math.abs(diff), BOT_SPEED * k.dt());
       bot.pos.y += Math.sign(diff) * step;
     }
-    bot.pos.y = Math.min(
+    bot.pos.y = clamp(
+      bot.pos.y,
+      PADDLE_HEIGHT / 2,
       GAME_HEIGHT - PADDLE_HEIGHT / 2,
-      Math.max(PADDLE_HEIGHT / 2, bot.pos.y),
     );
 
     ball.pos.x += ball.vel.x * k.dt();

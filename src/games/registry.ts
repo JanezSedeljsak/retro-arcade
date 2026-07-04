@@ -31,13 +31,12 @@ export const games: GameMeta[] = [
   {
     id: "space-invaders",
     title: "Space Invaders",
-    description: "Defend Earth from endless waves of invading aliens.",
-    isTimeBased: true,
+    description: "Clear every alien before they land.",
   },
   {
     id: "whirlybird",
     title: "Whirlybird",
-    description: "Navigate your plane through the skies and avoid obstacles.",
+    description: "Navigate Zogez through the skies and avoid obstacles.",
   },
   {
     id: "stacktower",

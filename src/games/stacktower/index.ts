@@ -30,7 +30,6 @@ const SPEED_INCREMENT = 15;
 
 // Color palette — the hue cycles through the stack so every block reads
 // as a distinct band. Kept in the 0..255 RGB range kaplay expects.
-const BG_COLOR = [20, 18, 40] as const;
 const SCORE_COLOR = [255, 120, 220] as const;
 const GAME_OVER_COLOR = [255, 80, 120] as const;
 const RESTART_COLOR = [255, 120, 220] as const;
@@ -185,16 +184,6 @@ export class StacktowerGame extends BaseGame {
 
     // Camera pans upward as the tower climbs; reset it to the board center.
     this._k.setCamPos(DEFAULT_CAM_X, DEFAULT_CAM_Y);
-
-    // fixed() keeps the background pinned to the viewport instead of world
-    // space, so it always fills the screen no matter how high we pan.
-    this._k.add([
-      this._k.rect(BOARD_SIZE, BOARD_SIZE),
-      this._k.pos(0, 0),
-      this._k.color(...BG_COLOR),
-      this._k.fixed(),
-      SCENE_TAG,
-    ]);
 
     // Score stays in the top-left corner of the screen, not the world.
     this.scoreText = this._k.add([

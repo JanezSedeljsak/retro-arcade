@@ -9,7 +9,16 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>,
 );
 
-// Wake the Supabase free-tier container as soon as the app opens. The
-// dynamic import keeps supabase-js out of the initial bundle (it loads
-// alongside/after the app shell instead of blocking it).
-void import("@/lib/supabase").then(({ pingSupabase }) => pingSupabase());
+// Wake the Supabase free-tier container once the browser is idle, so the
+// warmup ping (and the supabase-js chunk it pulls in) doesn't compete with
+// the initial page load for bandwidth/main-thread time. Falls back to a
+// short timeout on browsers without requestIdleCallback (e.g. Safari).
+function pingSupabaseWhenIdle() {
+  void import("@/lib/supabase").then(({ pingSupabase }) => pingSupabase());
+}
+
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(pingSupabaseWhenIdle);
+} else {
+  setTimeout(pingSupabaseWhenIdle, 1);
+}

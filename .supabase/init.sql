@@ -6,6 +6,11 @@ create table scores (
   created_at timestamptz default now()
 );
 
+-- use less space on supabase
+alter table scores
+  alter column game_id type varchar(32),
+  alter column username type varchar(32);
+
 create or replace function top_scores(p_game_id text)
 returns setof scores
 language sql

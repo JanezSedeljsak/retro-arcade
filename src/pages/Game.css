@@ -6,6 +6,11 @@
   flex-direction: column;
   height: 100%;
   color: var(--fg);
+  /* Fast taps during gameplay (canvas presses, joystick drags) shouldn't
+     select surrounding text, especially on mobile. The leaderboard modal
+     re-enables selection since it's nested inside this panel. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .game-header {
@@ -16,15 +21,23 @@
   border-bottom: 2px solid rgba(var(--pink-rgb), 0.2);
 }
 
-.game-back-link {
+.game-back-link,
+.game-reset-btn {
+  font-family: inherit;
+  font-size: 1.4rem;
   color: var(--pink);
   text-decoration: none;
-  font-size: 1.4rem;
+  background: transparent;
+  border: 2px solid rgba(var(--pink-rgb), 0.4);
+  border-radius: 6px;
+  padding: 2px 14px;
+  cursor: pointer;
   white-space: nowrap;
 }
 
-.game-back-link:hover {
-  text-decoration: underline;
+.game-back-link:hover,
+.game-reset-btn:hover:not(:disabled) {
+  border-color: var(--pink);
 }
 
 .game-title {
@@ -34,30 +47,25 @@
   flex: 1;
 }
 
-.game-reset-btn {
-  font-family: inherit;
-  font-size: 1.4rem;
-  color: var(--pink);
-  background: transparent;
-  border: 2px solid rgba(var(--pink-rgb), 0.4);
-  border-radius: 6px;
-  padding: 2px 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.game-reset-btn:hover:not(:disabled) {
-  border-color: var(--pink);
-}
-
 .game-reset-btn:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
 /* On small screens the tap targets for Back/Reset get bumped up so
-   they're easier to hit with a thumb. */
+   they're easier to hit with a thumb — shrink the header's own padding
+   and the title so those bigger buttons still fit on one row. */
 @media (max-width: 600px) {
+  .game-header {
+    gap: 10px;
+    padding: 6px 3vmin;
+  }
+
+  .game-title {
+    font-size: 1rem;
+    text-align: center;
+  }
+
   .game-back-link,
   .game-reset-btn {
     font-size: 1.8rem;
@@ -75,6 +83,17 @@
 
 .game-loading {
   color: var(--fg-dim);
+}
+
+.game-reload-btn {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--pink);
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* The joystick overlays the bottom-right of the panel so it takes no

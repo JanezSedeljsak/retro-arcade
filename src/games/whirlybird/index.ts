@@ -15,6 +15,7 @@ import {
   BaseGame,
   GAME_WIDTH,
   GAME_HEIGHT,
+  clamp,
   type GameControls,
   type GameOverHandler,
 } from "@/games/base";
@@ -392,9 +393,10 @@ export class WhirlybirdGame extends BaseGame {
     }
 
     // Keep player within horizontal bounds (world)
-    this.playerPos.x = Math.max(
+    this.playerPos.x = clamp(
+      this.playerPos.x,
       PLAYER_RADIUS,
-      Math.min(BOARD_WIDTH - PLAYER_RADIUS, this.playerPos.x),
+      BOARD_WIDTH - PLAYER_RADIUS,
     );
 
     // Track highest point reached (smallest y)
@@ -626,7 +628,6 @@ export class WhirlybirdGame extends BaseGame {
     const k = this._k;
     const min = PLATFORM_WIDTH / 2 + PLATFORM_SPAWN_OFFSET;
     const max = BOARD_WIDTH - PLATFORM_WIDTH / 2 - PLATFORM_SPAWN_OFFSET;
-    const clamp = (v: number) => Math.max(min, Math.min(max, v));
 
     if (kind === "normal") {
       let attempts = 0;
@@ -650,7 +651,7 @@ export class WhirlybirdGame extends BaseGame {
       kind === "spike"
         ? k.rand(-SPIKE_BAIT_OFFSET, SPIKE_BAIT_OFFSET)
         : k.rand(-FRAGILE_BAIT_OFFSET, FRAGILE_BAIT_OFFSET);
-    return clamp(this.lastSpawnX + offset);
+    return clamp(this.lastSpawnX + offset, min, max);
   }
 
   /**
